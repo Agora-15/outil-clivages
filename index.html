@@ -2,159 +2,174 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agora-15 | Modélisation des 12 Clivages</title>
+    <title>Agora-15 | Modèle Moléculaire</title>
     <style>
-        body {
-            margin: 0; padding: 40px 20px; background-color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex; flex-direction: column; align-items: center; user-select: none;
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden;
+            user-select: none;
         }
-        h1 { text-transform: uppercase; letter-spacing: 2px; font-weight: 300; margin-bottom: 5px; }
-        .instruction { color: #8e8e93; font-size: 14px; margin-bottom: 30px; text-align: center; }
+        h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
+        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
         
-        /* Conteneur vertical pour empiler les 6 paires de clivages */
-        .liste-axes {
-            display: flex; flex-direction: column; gap: 20px;
-            width: 100%; max-width: 600px; margin-bottom: 100px;
-        }
-        .ligne-axe {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #f2f2f7; padding: 15px; border-radius: 12px; gap: 15px;
-        }
-        .item-face {
-            flex: 1; background: #ffffff; border: 2px solid #007aff;
-            border-radius: 8px; padding: 15px; text-align: center;
-            font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;
-        }
-        .item-face:hover { background: rgba(0, 122, 255, 0.02); }
+        .scene { width: 300px; height: 300px; perspective: 700px; margin-top: 20px; cursor: grab; }
+        .scene:active { cursor: grabbing; }
         
-        /* Style des faces verrouillées en gris anthracite */
-        .item-face.bloque {
-            background: #e5e5ea !important; color: #4a4a4a !important;
-            border-color: #8e8e93 !important; cursor: not-allowed !important; font-weight: 500;
+        .structure {
+            width: 100%; height: 100%; position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(20deg);
         }
-        .separateur { font-weight: 300; color: #8e8e93; font-size: 12px; }
+        
+        .face {
+            position: absolute; width: 80px; height: 80px;
+            left: 110px; top: 110px;
+            border: 1.5px solid #007aff;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.85);
+            color: #1c1c1e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px; font-weight: bold; text-align: center;
+            box-sizing: border-box; padding: 5px;
+            backface-visibility: visible; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .face.locked {
+            background: rgba(142, 142, 147, 0.18) !important;
+            color: #4a4a4a !important;
+            border-color: #8e8e93 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .fV0  { transform: rotateY(   0deg) translateZ(100px); }
+        .fV1  { transform: rotateY( 180deg) translateZ(100px); }
+        .fV2  { transform: rotateY(  90deg) translateZ(100px); }
+        .fV3  { transform: rotateY( -90deg) translateZ(100px); }
+        .fV4  { transform: rotateY(  45deg) translateZ(100px); }
+        .fV5  { transform: rotateY(-135deg) translateZ(100px); }
+        .fV6  { transform: rotateY( -45deg) translateZ(100px); }
+        .fV7  { transform: rotateY( 135deg) translateZ(100px); }
+        .fV8  { transform: rotateY( 22.5deg) translateZ(100px); }
+        .fV9  { transform: rotateY(-157.5deg) translateZ(100px); }
+        .fV10 { transform: rotateY(-22.5deg) translateZ(100px); }
+        .fV11 { transform: rotateY(157.5deg) translateZ(100px); }
+        .fV12 { transform: rotateY( 67.5deg) translateZ(100px); }
+        .fV13 { transform: rotateY(-112.5deg) translateZ(100px); }
+        .fV14 { transform: rotateY(-67.5deg) translateZ(100px); }
+        .fV15 { transform: rotateY(112.5deg) translateZ(100px); }
+        
+        .fH0  { transform: rotateX(  90deg) translateZ(100px); }
+        .fH1  { transform: rotateX( -90deg) translateZ(100px); }
+        
+        .fA0  { transform: rotateX(  45deg) translateZ(100px); }
+        .fA1  { transform: rotateX(-135deg) translateZ(100px); }
+        .fA2  { transform: rotateX( -45deg) translateZ(100px); }
+        .fA3  { transform: rotateX( 135deg) translateZ(100px); }
 
         #control-widget {
-            position: fixed; bottom: 30px; background: rgba(255, 255, 255, 0.98);
-            border: 1px solid #e5e5ea; padding: 15px 40px; border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center;
-            min-width: 280px; opacity: 0; transform: translateY(15px);
-            transition: all 0.3s; pointer-events: none; z-index: 100;
+            position: absolute; bottom: 40px;
+            background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea;
+            padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center; min-width: 280px; opacity: 0; transform: translateY(20px);
+            transition: all 0.4s; pointer-events: none;
         }
         #control-widget.visible { opacity: 1; transform: translateY(0); }
-        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; }
-        .widget-sub { font-size: 12px; color: #007aff; font-weight: 500; margin-top: 4px; }
+        .widget-title { font-size: 15px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
+        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <h1>Agora-15</h1>
-    <p class="instruction">Étape 7 : Modèle Linéaire Stable. Cliquez sur une option, molette pour noter.</p>
+    <p>Modèle Moléculaire : Cercles réduits d'un tiers.</p>
 
-    <div class="liste-axes">
-        <div class="ligne-axe">
-            <div class="item-face" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
-            <div class="separateur">🔀</div>
-            <div class="item-face" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
-        </div>
-        <div class="ligne-axe">
-            <div class="item-face" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
-            <div class="separateur">🔀</div>
-            <div class="item-face" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
-        </div>
-        <div class="ligne-axe">
-            <div class="item-face" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
-            <div class="separateur">🔀</div>
-            <div class="item-face" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
-        </div>
-        <div class="ligne-axe">
-            <div class="item-face" id="f-femi" data-opp="f-patr" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
-            <div class="separateur">🔀</div>
-            <div class="item-face" id="f-patr" data-opp="f-femi" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
-        </div>
-        <div class="ligne-axe">
-            <div class="item-face" id="f-esse" data-opp="f-cons" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
-            <div class="separateur">🔀</div>
-            <div class="item-face" id="f-cons" data-opp="f-esse" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
-        </div>
-        <div class="ligne-axe">
-            <div class="item-face" id="f-roya" data-opp="f-repu" data-name="ROYALISME" data-score="0">ROYALISME</div>
-            <div class="separateur">🔀</div>
-            <div class="item-face" id="f-repu" data-opp="f-roya" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
+    <div class="scene" id="scene">
+        <div class="structure" id="structure">
+            <div class="face fV0" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="face fV1" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+            <div class="face fV2" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="face fV3" id="face-3" data-opp="face-2" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+            <div class="face fV4" id="face-4" data-opp="face-5" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="face fV5" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
+            <div class="face fV6" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
+            <div class="face fV7" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
+            <div class="face fV8" id="face-8" data-opp="face-9" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
+            <div class="face fV9" id="face-9" data-opp="face-8" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
+            <div class="face fV10" id="face-10" data-opp="face-11" data-name="ROYALISME" data-score="0">ROYALISME</div>
+            <div class="face fV11" id="face-11" data-opp="face-10" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
+            <div class="face fV12" id="face-12" data-opp="face-13" data-name="LIBÉRALISME" data-score="0">LIBÉRALISME</div>
+            <div class="face fV13" id="face-13" data-opp="face-12" data-name="PROTECTIONNISME" data-score="0">PROTECTIONNISME</div>
+            <div class="face fV14" id="face-14" data-opp="face-15" data-name="UNIVERSALISME" data-score="0">UNIVERSALISME</div>
+            <div class="face fV15" id="face-15" data-opp="face-14" data-name="COMMUNAUTARISME" data-score="0">COMMUNAUTARISME</div>
+            <div class="face fH0" id="face-16" data-opp="face-17" data-name="AUTORITARISME" data-score="0">AUTORITARISME</div>
+            <div class="face fH1" id="face-17" data-opp="face-16" data-name="LIBERTARIANISME" data-score="0">LIBERTARIANISME</div>
+            <div class="face fA0" id="face-18" data-opp="face-19" data-name="PROGRESSISME" data-score="0">PROGRESSISME</div>
+            <div class="face fA1" id="face-19" data-opp="face-18" data-name="CONSERVATISME" data-score="0">CONSERVATISME</div>
+            <div class="face fA2" id="face-20" data-opp="face-21" data-name="CAPITALISME" data-score="0">CAPITALISME</div>
+            <div class="face fA3" id="face-21" data-opp="face-20" data-name="SOCIALISME" data-score="0">SOCIALISME</div>
         </div>
     </div>
-
     <div id="control-widget">
-        <div class="widget-title" id="act-name">Clivage</div>
-        <div class="widget-sub">Faites tourner la molette pour ajuster</div>
+        <div class="widget-title" id="active-face-name">Clivage</div>
+        <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
+    <script>
+        const scene = document.getElementById('scene'), structure = document.getElementById('structure'), faces = document.querySelectorAll('.face'), widget = document.getElementById('control-widget'), widgetTitle = document.getElementById('active-face-name');
+        let drag = false, cibleX = -20, cibleY = 20, rotationX = -20, rotationY = 20, vitesseX = 0, vitesseY = 0, dernierX = 0, dernierY = 0, faceSelectionnee = null;
 
+        scene.addEventListener('mousedown', (e) => {
+            drag = true; vitesseX = 0; vitesseY = 0;
+            dernierX = e.clientX; dernierY = e.clientY;
+        });
 
-        <script>
-        const faces = document.querySelectorAll('.item-face');
-        const widget = document.getElementById('control-widget');
-        const wTitle = document.getElementById('act-name');
-        let sel = null;
+        window.addEventListener('mousemove', (e) => {
+            if (!drag) return;
+            const deltaX = e.clientX - dernierX, deltaY = e.clientY - dernierY;
+            vitesseY = deltaX * 0.35; vitesseX = deltaY * 0.35;
+            cibleY += vitesseY; cibleX -= vitesseX;
+            dernierX = e.clientX; dernierY = e.clientY;
+        });
 
-        function rafraichirCouleurFace(f) {
-            const score = parseInt(f.getAttribute('data-score'));
-            const nomOrigine = f.getAttribute('data-name');
-            const opp = document.getElementById(f.getAttribute('data-opp'));
-            const nomOpposeOrigine = opp.getAttribute('data-name');
-            
+        window.addEventListener('mouseup', () => { drag = false; });
+
+        function bouclePhysique() {
+            if (!drag) { vitesseX *= 0.975; vitesseY *= 0.975; cibleY += vitesseY; cibleX -= vitesseX; }
+            rotationX += (cibleX - rotationX) * 0.12; rotationY += (cibleY - rotationY) * 0.12;
+            structure.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            requestAnimationFrame(bouclePhysique);
+        }
+        bouclePhysique();
+
+        function rafraichirCouleurFace(face) {
+            const score = parseInt(face.getAttribute('data-score')), nomOrigine = face.getAttribute('data-name'), faceOpposee = document.getElementById(face.getAttribute('data-opp')), nomOpposeOrigine = faceOpposee.getAttribute('data-name');
             if (score > 0) {
-                // Coloration progressive de la face sélectionnée en bleu intense
-                f.style.background = `rgba(0, 122, 255, ${0.15 + (score * 0.085)})`;
-                f.style.color = score > 5 ? '#ffffff' : '#1c1c1e';
-                f.style.borderColor = '#0056b3';
-                f.innerText = nomOrigine + " : +" + score;
-                f.classList.remove('bloque');
-
-                // Calcul dynamique et verrouillage de la face opposée (-14 si +6)
-                const scoreInverse = -(20 - score);
-                opp.classList.add('bloque');
-                opp.innerText = nomOpposeOrigine + " : " + scoreInverse;
-                opp.style.background = ''; opp.style.color = '';
-                opp.setAttribute('data-score', '0');
+                face.style.background = `rgba(0, 122, 255, ${0.2 + (score * 0.07)})`; face.style.color = score > 5 ? '#ffffff' : '#1c1c1e'; face.style.borderColor = '#0056b3'; face.innerText = nomOrigine + " : +" + score; face.classList.remove('locked');
+                faceOpposee.classList.add('locked'); faceOpposee.innerText = nomOpposeOrigine + " : " + (-(20 - score)); faceOpposee.style.background = ''; faceOpposee.style.color = ''; faceOpposee.setAttribute('data-score', '0'); 
             } else {
-                // Remise à l'état initial blanc si le score retombe à 0
-                f.style.background = '#ffffff'; f.style.color = '#1c1c1e'; f.style.borderColor = '#007aff';
-                f.innerText = nomOrigine;
-                opp.classList.remove('bloque');
-                opp.style.background = '#ffffff'; opp.style.color = '#1c1c1e'; opp.style.borderColor = '#007aff';
-                opp.innerText = nomOpposeOrigine;
+                face.style.background = 'rgba(255, 255, 255, 0.85)'; face.style.color = '#1c1c1e'; face.style.borderColor = '#007aff'; face.innerText = nomOrigine;
+                faceOpposee.classList.remove('locked'); faceOpposee.style.background = 'rgba(255, 255, 255, 0.85)'; faceOpposee.style.color = '#1c1c1e'; faceOpposee.style.borderColor = '#007aff'; faceOpposee.innerText = nomOpposeOrigine;
             }
         }
 
-        faces.forEach(f => {
-            f.addEventListener('click', () => {
-                if (f.classList.contains('bloque')) return;
-                
-                if (sel && sel !== f && !sel.classList.contains('bloque')) {
-                    rafraichirCouleurFace(sel);
-                }
-                
-                sel = f;
-                if (parseInt(f.getAttribute('data-score')) === 0) {
-                    f.style.background = 'rgba(0, 122, 255, 0.3)';
-                }
-                
-                widget.classList.add('visible');
-                wTitle.innerText = f.getAttribute('data-name') + " (+" + f.getAttribute('data-score') + ")";
+        faces.forEach(face => {
+            face.addEventListener('click', () => {
+                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3 || face.classList.contains('locked')) return;
+                if (faceSelectionnee && faceSelectionnee !== face && !faceSelectionnee.classList.contains('locked')) rafraichirCouleurFace(faceSelectionnee);
+                faceSelectionnee = face;
+                if (parseInt(face.getAttribute('data-score')) === 0) face.style.background = 'rgba(0, 122, 255, 0.4)';
+                widget.classList.add('visible'); widgetTitle.innerText = face.getAttribute('data-name') + " (+" + face.getAttribute('data-score') + ")";
             });
         });
 
         window.addEventListener('wheel', (e) => {
-            if (sel && !sel.classList.contains('bloque')) {
-                e.preventDefault();
-                let score = parseInt(sel.getAttribute('data-score'));
+            if (faceSelectionnee && !faceSelectionnee.classList.contains('locked')) {
+                e.preventDefault(); let score = parseInt(faceSelectionnee.getAttribute('data-score'));
                 score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
-                
-                sel.setAttribute('data-score', score);
-                rafraichirCouleurFace(sel);
-                wTitle.innerText = sel.getAttribute('data-name') + " (+" + score + ")";
+                faceSelectionnee.setAttribute('data-score', score); rafraichirCouleurFace(faceSelectionnee);
+                widgetTitle.innerText = faceSelectionnee.getAttribute('data-name') + " (+" + score + ")";
             }
         }, { passive: false });
     </script>
