@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Perspective Centrée</title>
+    <title>Agora-15 | Rotation Intuitive</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -14,7 +14,6 @@
         h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
         p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; }
         
-        /* 1. PERSPECTIVE CONIQUE CENTRALE RIGOUREUSE */
         .scene {
             width: 220px; height: 220px;
             perspective: 800px;
@@ -23,7 +22,6 @@
         }
         .scene:active { cursor: grabbing; }
         
-        /* 2. AXE DE ROTATION PARFAITEMENT CENTRÉ */
         .cube {
             width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
@@ -52,7 +50,6 @@
             font-weight: 500;
         }
         
-        /* Positionnement spatial strict par rapport au centre (0,0,0) */
         .front  { transform: rotateY(  0deg) translateZ(110px); }
         .back   { transform: rotateY(180deg) translateZ(110px); }
         .right  { transform: rotateY( 90deg) translateZ(110px); }
@@ -76,7 +73,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Étape 6.3 : Rétablissement de la perspective conique centrale et des scores.</p>
+    <p>Étape 6.4 : Correction de l'inversion de rotation quand le cube a la tête en bas.</p>
     
     <div class="scene" id="scene">
         <div class="cube" id="cube">
@@ -117,7 +114,16 @@
             if (!drag) return;
             const dX = e.clientX - lX;
             const dY = e.clientY - lY;
-            vY = dX * 0.35; vX = dY * 0.35;
+            
+            // Correction géométrique : On détecte si le cube est "à l'envers" sur l'axe X
+            // Si le cosinus est négatif, le cube a subi un retournement de plus de 90°
+            // On inverse alors dX pour que la gauche et la droite restent naturelles.
+            const angleRadX = rX * Math.PI / 180;
+            const directionAxeY = Math.cos(angleRadX) >= 0 ? 1 : -1;
+            
+            vY = dX * 0.35 * directionAxeY; 
+            vX = dY * 0.35;
+            
             cY += vY; cX -= vX;
             lX = e.clientX; lY = e.clientY;
         });
@@ -126,16 +132,23 @@
         
         scene.addEventListener('touchstart', (e) => {
             drag = true; vX = 0; vY = 0;
-            lX = e.touches[0].clientX; lY = e.touches[0].clientY;
+            lX = e.touches.clientX; lY = e.touches.clientY;
         }, { passive: true });
         
         window.addEventListener('touchmove', (e) => {
             if (!drag) return;
-            const dX = e.touches[0].clientX - lX;
-            const dY = e.touches[0].clientY - lY;
-            vY = dX * 0.35; vX = dY * 0.35;
+            const dX = e.touches.clientX - lX;
+            const dY = e.touches.clientY - lY;
+            
+            // Même correction appliquée pour le tactile (téléphones/tablettes)
+            const angleRadX = rX * Math.PI / 180;
+            const directionAxeY = Math.cos(angleRadX) >= 0 ? 1 : -1;
+            
+            vY = dX * 0.35 * directionAxeY; 
+            vX = dY * 0.35;
+            
             cY += vY; cX -= vX;
-            lX = e.touches[0].clientX; lY = e.touches[0].clientY;
+            lX = e.touches.clientX; lY = e.touches.clientY;
         }, { passive: true });
         
         window.addEventListener('touchend', () => { drag = false; });
@@ -187,10 +200,7 @@
         faces.forEach(f => {
             f.addEventListener('click', () => {
                 if (Math.abs(vX) > 0.3 || Math.abs(vY) > 0.3 || f.classList.contains('locked')) return;
-                
-                if (sel && sel !== f && !sel.classList.contains('locked')) {
-                    color(sel);
-                }
+                if (sel && sel !== f && !sel.classList.contains('locked')) color(sel);
                 
                 sel = f;
                 if (parseInt(f.getAttribute('data-score')) === 0) {
