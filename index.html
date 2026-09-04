@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Dodécaèdre Fixe</title>
+    <title>Agora-15 | Dodécaèdre Stable</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -57,44 +57,44 @@
             { name: "ROYALISME", opp: 11, score: 0, locked: false }, { name: "RÉPUBLICANISME", opp: 10, score: 0, locked: false }
         ];
 
-        // 12 Losanges parfaits dessinés en rosace (Toutes les coordonnées sont remplies à 100%)
-        const facesGeo = [
-            [[0,-35], [45,-60], [45,-110], [0,-85]],
-            [[45,-60], [90,-35], [90,-85], [45,-110]],
-            [[0,-35], [-45,-60], [-45,-110], [0,-85]],
-            [[-45,-60], [-90,-35], [-90,-85], [-45,-110]],
-            [[45,-60], [90,-35], [45,-10], [0,-35]],
-            [[-45,-60], [-90,-35], [-45,-10], [0,-35]],
-            [[90,-35], [90,15], [45,40], [45,-10]],
-            [[-90,-35], [-90,15], [-45,40], [-45,-10]],
-            [[0,-35], [45,-10], [45,40], [0,15]],
-            [[0,-35], [-45,-10], [-45,40], [0,15]],
-            [[45,-10], [45,40], [0,15], [0,-15]],
-            [[-45,-10], [-45,40], [0,15], [0,-15]]
-        ];
-
         function dessiner() {
             canvas.innerHTML = '';
             
-            facesGeo.forEach((f, id) => {
-                const data = clivages[id];
-                const poly = document.createElementNS("http://w3.org", "polygon");
+            // L'algorithme calcule lui-même les 12 losanges parfaits en rosace autour du centre
+            for (let i = 0; i < 12; i++) {
+                const data = clivages[i];
                 
-                // Tracé géométrique à l'échelle x1.5 pour occuper l'écran
-                const pStr = f.map(p => `${p[0]*1.5},${p[1]*1.5}`).join(' ');
-                poly.setAttribute("points", pStr);
+                // Formule trigonométrique pour générer les 4 sommets de chaque losange
+                const angleCentre = (i * Math.PI * 2) / 12 - Math.PI / 2;
+                const angleSuivant = ((i + 1) * Math.PI * 2) / 12 - Math.PI / 2;
+                
+                const rExt = 130;
+                const rInt = 75;
+                const rNoyau = 35;
+
+                const x1 = rExt * Math.cos(angleCentre);
+                const y1 = rExt * Math.sin(angleCentre);
+                const x2 = rInt * Math.cos((angleCentre + angleSuivant) / 2);
+                const y2 = rInt * Math.sin((angleCentre + angleSuivant) / 2);
+                const x3 = rExt * Math.cos(angleSuivant);
+                const y3 = rExt * Math.sin(angleSuivant);
+                const x4 = rNoyau * Math.cos((angleCentre + angleSuivant) / 2);
+                const y4 = rNoyau * Math.sin((angleCentre + angleSuivant) / 2);
+
+                const poly = document.createElementNS("http://w3.org", "polygon");
+                poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x3},${y3} ${x4},${y4}`);
                 poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
                 
-                if (selIdx === id) poly.style.fill = "rgba(0,122,255,0.4)";
+                if (selIdx === i) poly.style.fill = "rgba(0,122,255,0.4)";
                 else if (data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
 
-                // Calcul mathématique des centres exacts des losanges pour le texte
-                const cx = (f[0][0] + f[1][0] + f[2][0] + f[3][0]) / 4 * 1.5;
-                const cy = (f[0][1] + f[1][1] + f[2][1] + f[3][1]) / 4 * 1.5;
+                // Centre géométrique du losange pour positionner le texte
+                const cx = (x1 + x2 + x3 + x4) / 4;
+                const cy = (y1 + y2 + y3 + y4) / 4;
 
                 const txt = document.createElementNS("http://w3.org", "text");
                 txt.setAttribute("x", cx); txt.setAttribute("y", cy);
-                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === id ? " active" : ""));
+                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === i ? " active" : ""));
                 
                 let label = data.name;
                 if (data.locked) label += " : " + data.score;
@@ -103,7 +103,7 @@
 
                 poly.addEventListener('click', () => {
                     if (data.locked) return;
-                    selIdx = id;
+                    selIdx = i;
                     widget.classList.add('visible');
                     wTitle.textContent = data.name + " (+" + data.score + ")";
                     dessiner();
@@ -111,7 +111,7 @@
 
                 canvas.appendChild(poly);
                 canvas.appendChild(txt);
-            });
+            }
         }
         
         dessiner();
