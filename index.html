@@ -1,38 +1,155 @@
-using UnityEngine;
-
-public class ControleCube : MonoBehaviour
-{
-    [Header("Paramètres de Rotation")]
-    [Tooltip("Vitesse de rotation du cube")]
-    public float vitesseRotation = 100f;
-
-    void Update()
-    {
-        // 1. Récupération des entrées utilisateur (Flèches Gauche/Droite, touches Q/D, ou Joystick)
-        float inputHorizontal = Input.GetAxis("Horizontal"); // Axe horizontal (Y)
-        float inputVertical = Input.GetAxis("Vertical");     // Axe vertical (X)
-
-        // 2. Détection de l'orientation du cube dans l'espace
-        // On calcule le produit scalaire entre le "Haut" du cube et le "Haut" du monde
-        // Si le résultat est négatif, cela signifie que le cube est incliné à plus de 90° (tête en bas)
-        bool estALenvers = Vector3.Dot(transform.up, Vector3.up) < 0;
-
-        // 3. Correction des inversions si le cube est à l'envers
-        if (estALenvers)
-        {
-            // Inverse les commandes pour que l'action reste naturelle à l'écran
-            inputHorizontal *= -1f;
-            inputVertical *= -1f;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outil Clivages - Cube Interactif</title>
+    <style>
+        /* Réinitialisation de la page */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e24;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
         }
 
-        // 4. Application des rotations sur le cube
-        // Rotation autour de l'axe X (haut/bas) et de l'axe Y (gauche/droite)
-        float rotationX = inputVertical * vitesseRotation * Time.deltaTime;
-        float rotationY = -inputHorizontal * vitesseRotation * Time.deltaTime;
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
 
-        // On applique la rotation dans le repère global (Space.World) 
-        // pour éviter que les axes locaux ne se mélangent (phénomène de Gimbal Lock)
-        transform.Rotate(Vector3.up, rotationY, Space.World);
-        transform.Rotate(Vector3.right, rotationX, Space.World);
-    }
-}
+        /* Espace 3D pour le Cube */
+        .scene 3d {
+            width: 200px;
+            height: 200px;
+            perspective: 600px;
+        }
+
+        /* Le conteneur du Cube */
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: grab;
+            transition: transform 0.05s linear;
+        }
+
+        .cube:active {
+            cursor: grabbing;
+        }
+
+        /* Propriétés communes de chaque Face du Cube */
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            opacity: 0.85;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Définition de la position spatiale et de la couleur des faces */
+        .face.devant  { background: #e63946; transform: rotateY(  0deg) translateZ(100px); }
+        .face.derriere{ background: #f1faee; color: #1e1e24; transform: rotateY(180deg) translateZ(100px); }
+        .face.droite  { background: #a8dadc; color: #1e1e24; transform: rotateY( 90deg) translateZ(100px); }
+        .face.gauche  { background: #457b9d; transform: rotateY(-90deg) translateZ(100px); }
+        .face.haut    { background: #1d3557; transform: rotateX( 90deg) translateZ(100px); }
+        .face.bas     { background: #ffb703; color: #1e1e24; transform: rotateX(-90deg) translateZ(100px); }
+    </style>
+</head>
+<body>
+
+    <h1>Outil Clivages</h1>
+
+    <!-- Structure du Cube 3D -->
+    <div class="scene3d">
+        <div id="monCube" class="cube">
+            <div class="face devant">Devant</div>
+            <div class="face derriere">Derrière</div>
+            <div class="face droite">Droite</div>
+            <div class="face gauche">Gauche</div>
+            <div class="face haut">Haut</div>
+            <div class="face bas">Bas</div>
+        </div>
+    </div>
+
+    <script>
+        // Récupération de l'élément HTML du cube
+        const cube = document.getElementById('monCube');
+
+        // Variables pour mémoriser l'état des angles
+        let angleX = -20; // Inclinaison de départ (pour un effet de relief)
+        let angleY = 35;
+        const sensibilite = 0.4;
+
+        let enMouvement = false;
+        let dernierX = 0;
+        let dernierY = 0;
+
+        // Application de la position de départ au chargement
+        cube.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+
+        // --- GESTION DES APPUIS (Souris et Tactile) ---
+        window.addEventListener('pointerdown', (e) => {
+            enMouvement = true;
+            dernierX = e.clientX;
+            dernierY = e.clientY;
+        });
+
+        // --- ARRÊT DU MOUVEMENT ---
+        window.addEventListener('pointerup', () => enMouvement = false);
+        window.addEventListener('pointercancel', () => enMouvement = false);
+
+        // --- LOGIQUE DE ROTATION UNIQUE ---
+        window.addEventListener('pointermove', (e) => {
+            if (!enMouvement) return;
+
+            // Calcul du delta de déplacement de l'utilisateur
+            let deltaX = e.clientX - dernierX;
+            let deltaY = e.clientY - dernierY;
+
+            dernierX = e.clientX;
+            dernierY = e.clientY;
+
+            // --- CORRECTIF DE LA TÊTE EN BAS ---
+            // On calcule le cosinus de l'inclinaison verticale (X) convertie en radians.
+            // Si le résultat est inférieur à 0, le cube est incliné à plus de 90° (tête en bas).
+            const radiansX = (angleX * Math.PI) / 180;
+            const estALenvers = Math.cos(radiansX) < 0;
+
+            if (estALenvers) {
+                // Inversion magique : le mouvement horizontal utilisateur correspond 
+                // de nouveau à la logique visuelle naturelle à l'écran.
+                deltaX = -deltaX;
+            }
+
+            // Cumul et application des déplacements multipliés par la sensibilité
+            angleY += deltaX * sensibilite;
+            angleX -= deltaY * sensibilite; // Soustraction pour lever le cube en glissant vers le haut
+
+            // Reste dans une plage propre (0-360 degrés)
+            angleX = angleX % 360;
+            angleY = angleY % 360;
+
+            // Rendu de la transformation CSS
+            cube.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        });
+    </script>
+</body>
+</html>
