@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Géométrie Rhombique</title>
+    <title>Agora-15 | Alignement Rhombique</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Triacontaèdre moléculaire : 30 disques répartis en 6 couronnes alternées de 5 (sans pôle).</p>
+    <p>Triacontaèdre : 30 disques alignés sur 5 fuseaux verticaux (Ceinture de 10 cercles axée).</p>
     <div class="scene" id="scene">
         <svg viewBox="-170 -160 340 340"><g id="poly-group"></g></svg>
     </div>
@@ -54,20 +54,19 @@
             { name: "SCIENTISME", opp: 29, score: 0, locked: false }, { name: "RELATIVISME SCIENTIFIQUE", opp: 28, score: 0, locked: false }
         ];
 
-        // Génération rigoureuse des 30 vecteurs du Triacontaèdre par couronnes de 5 (Rayon = 120px)
+        // 30 directions basées sur 5 fuseaux verticaux stricts (sans aucun décalage d'angle)
         const directions = [];
         const R = 120;
         
-        // Les 6 couronnes de 5 niveaux induites par le Nombre d'Or
-        const latitudes = [79.19, 52.62, 18.0, -18.0, -52.62, -79.19];
+        // Les 6 hauteurs verticales alignées (4 couronnes + 2 niveaux de ceinture)
+        const latitudes = [75.0, 45.0, 15.0, -15.0, -45.0, -75.0];
         
-        latitudes.forEach((lat, cIdx) => {
+        latitudes.forEach((lat) => {
             const phi = lat * Math.PI / 180;
-            // Alternance de 36° entre chaque niveau pour imbriquer les losanges en quinconce
-            const offset = (cIdx % 2) * (36 * Math.PI / 180); 
             
+            // Alignement strict sur 5 axes (aucun décalage quinconce)
             for (let i = 0; i < 5; i++) {
-                const theta = (i * 72 * Math.PI / 180) + offset;
+                const theta = i * 72 * Math.PI / 180;
                 directions.push({
                     x: R * Math.cos(phi) * Math.cos(theta),
                     y: R * Math.sin(phi),
