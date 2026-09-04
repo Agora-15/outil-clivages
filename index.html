@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Dodécaèdre Stable</title>
+    <title>Agora-15 | Dodécaèdre Fixe</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -34,7 +34,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Étape 7 : Dodécaèdre Rhombique fixe à plat. Cliquez sur un losange, molette pour noter.</p>
+    <p>Étape 7 : Dodécaèdre Rhombique à plat. Cliquez sur un losange, molette pour noter.</p>
     <div class="scene">
         <svg viewBox="-160 -160 320 320"><g id="poly-group"></g></svg>
     </div>
@@ -57,8 +57,8 @@
             { name: "ROYALISME", opp: 11, score: 0, locked: false }, { name: "RÉPUBLICANISME", opp: 10, score: 0, locked: false }
         ];
 
-        // 12 Losanges parfaits dessinés en rosace (Z-ordering projeté sans aucune case vide)
-        const facesGéo = [
+        // 12 Losanges parfaits dessinés en rosace (Toutes les coordonnées sont remplies à 100%)
+        const facesGeo = [
             [[0,-35], [45,-60], [45,-110], [0,-85]],
             [[45,-60], [90,-35], [90,-85], [45,-110]],
             [[0,-35], [-45,-60], [-45,-110], [0,-85]],
@@ -76,11 +76,11 @@
         function dessiner() {
             canvas.innerHTML = '';
             
-            facesGéo.forEach((f, id) => {
+            facesGeo.forEach((f, id) => {
                 const data = clivages[id];
                 const poly = document.createElementNS("http://w3.org", "polygon");
                 
-                // Tracé géométrique à l'échelle x1.5 pour occuper l'écran blanc
+                // Tracé géométrique à l'échelle x1.5 pour occuper l'écran
                 const pStr = f.map(p => `${p[0]*1.5},${p[1]*1.5}`).join(' ');
                 poly.setAttribute("points", pStr);
                 poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
@@ -88,7 +88,7 @@
                 if (selIdx === id) poly.style.fill = "rgba(0,122,255,0.4)";
                 else if (data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
 
-                // Calcul mathématique des centres des losanges
+                // Calcul mathématique des centres exacts des losanges pour le texte
                 const cx = (f[0][0] + f[1][0] + f[2][0] + f[3][0]) / 4 * 1.5;
                 const cy = (f[0][1] + f[1][1] + f[2][1] + f[3][1]) / 4 * 1.5;
 
@@ -140,5 +140,3 @@
     </script>
 </body>
 </html>
-
-    
