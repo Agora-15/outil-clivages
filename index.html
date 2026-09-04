@@ -10,34 +10,25 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
             background-color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
         }
 
         #info-overlay {
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
+            margin-top: 30px;
             text-align: center;
-            pointer-events: none;
             color: #1c1c1e;
-            z-index: 10;
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 300;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             margin: 0 0 5px 0;
             text-transform: uppercase;
         }
@@ -48,84 +39,89 @@
             margin: 0;
         }
 
+        /* Conteneur graphique central */
+        #graphic-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 55vh;
+        }
+
+        svg {
+            width: 90%;
+            height: 90%;
+            max-width: 450px;
+            max-height: 450px;
+        }
+
+        /* Style des facettes géométriques */
+        .facet {
+            fill: #f2f2f7;
+            stroke: #d1d1d6;
+            stroke-width: 1.5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .facet:hover {
+            fill: #e5e5ea;
+            stroke: #8e8e93;
+        }
+
+        .facet.selected {
+            fill: #007aff !important;
+            stroke: #0056b3;
+        }
+
+        /* Widget du bas */
         #control-widget {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.98);
             border: 1px solid #e5e5ea;
             padding: 20px 40px;
             border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            display: none;
             text-align: center;
-            min-width: 300px;
-            z-index: 10;
+            min-width: 280px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .widget-title {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 15px;
             color: #1c1c1e;
+            margin-bottom: 5px;
         }
 
         .scroll-instruction {
             font-size: 12px;
-            color: #007aff;
-            margin-top: 10px;
+            color: #8e8e93;
         }
     </style>
-    <!-- UTILISATION DES LIENS DE SECOURS PLUS STABLES -->
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://jsdelivr.net"></script>
 </head>
 <body>
 
     <div id="info-overlay">
         <h1>Agora-15</h1>
-        <p>Explorez et cliquez sur une face pour interagir</p>
+        <p>Explorez la structure et cliquez sur une facette pour interagir</p>
     </div>
 
-    <div id="canvas-container"></div>
+    <div id="graphic-container">
+        <!-- Génération de la rosace géométrique sacrée du Triacontaèdre en SVG natif -->
+        <svg id="rosace" viewBox="0 0 400 400">
+            <g id="mesh-group"></g>
+        </svg>
+    </div>
 
-    <div id="control-widget">
+    <div id="control-widget" id="widget">
         <div class="widget-title" id="active-face-name">Clivage</div>
-        <div class="scroll-instruction">Utilisez la molette de votre souris pour ajuster votre force de conviction</div>
+        <div class="scroll-instruction">Faites tourner la molette de votre souris pour ajuster (0 à 10)</div>
     </div>
 
     <script>
-        // --- 1. INITIALISATION DE LA SCÈNE 3D ---
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
-
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 0, 8);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio || 1);
-        container.appendChild(renderer.domElement);
-
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-
-        // Éclairage renforcé pour éviter l'effet "point noir"
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
-        
-        const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.6);
-        dirLight1.position.set(5, 10, 7);
-        scene.add(dirLight1);
-
-        const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
-        dirLight2.position.set(-5, -5, -5);
-        scene.add(dirLight2);
-
-        // --- 2. LES 15 CLIVAGES ---
         const clivages = [
             "Républicanisme", "Royalisme", "Technocratie", "Populisme", 
             "Autoritarisme", "Libertarianisme", "Capitalisme", "Socialisme",
@@ -137,96 +133,77 @@
             "Scientisme", "Relativisme scientifique"
         ];
 
-        const solidGroup = new THREE.Group();
-        scene.add(solidGroup);
+        const meshGroup = document.getElementById('mesh-group');
+        const widget = document.getElementById('control-widget');
+        const faceNameText = document.getElementById('active-face-name');
+        let activeElement = null;
+        let scores = Array(30).fill(0);
 
-        const facesMesh = [];
+        // Construction mathématique de la rosace à 30 facettes (Projections de rayons)
+        const cx = 200, cy = 200;
+        const R1 = 150, R2 = 90, R3 = 45;
 
-        // Génération des 30 zones interactives externes
         for (let i = 0; i < 30; i++) {
-            const material = new THREE.MeshPhongMaterial({
-                color: 0xe5e5ea,
-                transparent: true,
-                opacity: 0.4,
-                side: THREE.DoubleSide
-            });
-            
-            const subGeom = new THREE.SphereGeometry(2, 8, 8, (i * (Math.PI * 2 / 30)), (Math.PI * 2 / 30));
-            const mesh = new THREE.Mesh(subGeom, material);
-            mesh.userData = { id: i, name: clivages[i], score: 0 };
-            solidGroup.add(mesh);
+            const angle1 = (i * (Math.PI * 2) / 30) - Math.PI/2;
+            const angle2 = ((i + 1) * (Math.PI * 2) / 30) - Math.PI/2;
 
-            const wireframeGeom = new THREE.EdgesGeometry(subGeom);
-            const wireframeMat = new THREE.LineBasicMaterial({ color: 0x8e8e93, linewidth: 1 });
-            const wireframe = new THREE.LineSegments(wireframeGeom, wireframeMat);
-            solidGroup.add(wireframe);
-        }
+            // Calcul des 4 points du losange projeté
+            const x1 = cx + R1 * Math.cos(angle1);
+            const y1 = cy + R1 * Math.sin(angle1);
+            const x2 = cx + R2 * Math.cos((angle1 + angle2) / 2);
+            const y2 = cy + R2 * Math.sin((angle1 + angle2) / 2);
+            const x3 = cx + R1 * Math.cos(angle2);
+            const y3 = cy + R1 * Math.sin(angle2);
+            const x4 = cx + R3 * Math.cos((angle1 + angle2) / 2);
+            const y4 = cy + R3 * Math.sin((angle1 + angle2) / 2);
 
-        // --- 3. GESTION DES CLICS ---
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let selectedFace = null;
+            // Création de la facette en format losange aplati
+            const poly = document.createElementNS("http://w3.org", "polygon");
+            poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x3},${y3} ${x4},${y4}`);
+            poly.setAttribute("class", "facet");
+            poly.dataset.index = i;
+            poly.dataset.name = clivages[i];
 
-        window.addEventListener('click', (event) => {
-            if (event.clientY > window.innerHeight - 120 && event.clientX > window.innerWidth/2 - 150 && event.clientX < window.innerWidth/2 + 150) {
-                return;
-            }
-
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(solidGroup.children);
-            const validIntersects = intersects.filter(hit => hit.object.userData && hit.object.userData.name);
-
-            if (validIntersects.length > 0) {
-                if(selectedFace) {
-                    selectedFace.material.color.setHex(0xe5e5ea);
-                    selectedFace.material.opacity = 0.4;
+            // Clic sur la facette
+            poly.addEventListener('click', function(e) {
+                if (activeElement) {
+                    activeElement.classList.remove('selected');
+                    // Restaurer l'opacité basée sur son score précédent
+                    const oldIdx = activeElement.dataset.index;
+                    activeElement.style.fill = scores[oldIdx] > 0 ? '#007aff' : '';
+                    activeElement.style.opacity = scores[oldIdx] > 0 ? 0.3 + (scores[oldIdx] * 0.07) : '';
                 }
-                
-                selectedFace = validIntersects[0].object; // Correction de l'index de sélection
-                selectedFace.material.color.setHex(0x007aff);
-                selectedFace.material.opacity = 0.7;
 
-                document.getElementById('control-widget').style.display = 'block';
-                document.getElementById('active-face-name').innerText = selectedFace.userData.name;
-            }
-        });
+                activeElement = poly;
+                poly.classList.add('selected');
+                poly.style.opacity = 1;
 
-        window.addEventListener('wheel', (event) => {
-            if (selectedFace) {
-                controls.enableZoom = false; 
-                let change = event.deltaY < 0 ? 1 : -1;
-                selectedFace.userData.score = Math.min(Math.max(selectedFace.userData.score + change, 0), 10);
-                
-                selectedFace.material.opacity = 0.3 + (selectedFace.userData.score * 0.06);
-                document.getElementById('active-face-name').innerText = selectedFace.userData.name + " : +" + selectedFace.userData.score;
-                
-                setTimeout(() => { controls.enableZoom = true; }, 200);
-            }
-        });
+                widget.style.opacity = 1;
+                const idx = poly.dataset.index;
+                faceNameText.innerText = poly.dataset.name + " : +" + scores[idx];
+            });
 
-        // --- 4. BOUCLE D'ANIMATION ---
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            if (!selectedFace) {
-                solidGroup.rotation.y += 0.002;
-                solidGroup.rotation.x += 0.001;
-            }
-
-            controls.update();
-            renderer.render(scene, camera);
+            meshGroup.appendChild(poly);
         }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // Capture de la molette pour ajuster le score
+        window.addEventListener('wheel', function(e) {
+            if (activeElement) {
+                e.preventDefault(); // Empêche la page de bouger
+                const idx = parseInt(activeElement.dataset.index);
+                
+                if (e.deltaY < 0) {
+                    scores[idx] = Math.min(scores[idx] + 1, 10);
+                } else {
+                    scores[idx] = Math.max(scores[idx] - 1, 0);
+                }
 
-        animate();
+                faceNameText.innerText = activeElement.dataset.name + " : +" + scores[idx];
+                
+                // Si le score est supérieur à 0, la face reste bleutée en arrière-plan
+                activeElement.style.opacity = 0.4 + (scores[idx] * 0.06);
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
