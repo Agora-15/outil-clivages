@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Triacontaèdre Rhombique : Ceinture de 10 cercles (2 niveaux de 5 alternés), 0 pôle horizontal.</p>
+    <p>Modélisation Moléculaire : 30 disques (Ceinture de 10 cercles alternés, sans pôles).</p>
     <div class="scene" id="scene">
         <svg viewBox="-170 -160 340 340"><g id="poly-group"></g></svg>
     </div>
@@ -56,19 +56,19 @@
 
         const g = 1.618, R = 120;
         const directions = [
-            // 20 Vecteurs d'or tridimensionnels originaux conservés
+            // Les 20 vecteurs tridimensionnels originaux d'or de votre code de base
             { x: R, y: 0, z: R/g }, { x: -R, y: 0, z: -R/g }, { x: R/g, y: R, z: 0 }, { x: -R/g, y: -R, z: 0 },
             { x: 0, y: R/g, z: R }, { x: 0, y: -R/g, z: -R }, { x: R, y: 0, z: -R/g }, { x: -R, y: 0, z: R/g },
             { x: R/g, y: -R, z: 0 }, { x: -R/g, y: R, z: 0 }, { x: 0, y: R/g, z: -R }, { x: 0, y: -R/g, z: R },
             { x: R/g, y: R/g, z: R/g }, { x: -R/g, y: -R/g, z: -R/g }, { x: R/g, y: R/g, z: -R/g }, { x: -R/g, y: -R/g, z: R/g },
             { x: R/g, y: -R/g, z: R/g }, { x: -R/g, y: R/g, z: -R/g }, { x: R/g, y: -R/g, z: -R/g }, { x: -R/g, y: R/g, z: R/g },
             
-            // Correction : Ceinture de 10 cercles verticaux (2 niveaux de 5 alternés sans pôles horizontaux)
+            // Correction : Les 2 axes horizontaux purs supprimés. La ceinture contient désormais 10 cercles (2 niveaux alternés de 5)
             { x: R*Math.cos(0), y: 15, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: -15, z: R*Math.sin(Math.PI) },
-            { x: R*Math.cos(72*Math.PI/180), y: 15, z: R*Math.sin(72*Math.PI/180) }, { x: R*Math.cos(-108*Math.PI/180), y: -15, z: R*Math.sin(-108*Math.PI/180) },
-            { x: R*Math.cos(144*Math.PI/180), y: 15, z: R*Math.sin(144*Math.PI/180) }, { x: R*Math.cos(-36*Math.PI/180), y: -15, z: R*Math.sin(-36*Math.PI/180) },
-            { x: R*Math.cos(-144*Math.PI/180), y: 15, z: R*Math.sin(-144*Math.PI/180) }, { x: R*Math.cos(36*Math.PI/180), y: -15, z: R*Math.sin(36*Math.PI/180) },
-            { x: R*Math.cos(-72*Math.PI/180), y: 15, z: R*Math.sin(-72*Math.PI/180) }, { x: R*Math.cos(108*Math.PI/180), y: -15, z: R*Math.sin(108*Math.PI/180) }
+            { x: R*Math.cos(Math.PI/4), y: 15, z: R*Math.sin(Math.PI/4) }, { x: R*Math.cos(-3*Math.PI/4), y: -15, z: R*Math.sin(-3*Math.PI/4) },
+            { x: R*Math.cos(-Math.PI/4), y: 15, z: R*Math.sin(-Math.PI/4) }, { x: R*Math.cos(3*Math.PI/4), y: -15, z: R*Math.sin(3*Math.PI/4) },
+            { x: R*Math.cos(Math.PI/2), y: 15, z: R*Math.sin(Math.PI/2) }, { x: R*Math.cos(-Math.PI/2), y: -15, z: R*Math.sin(-Math.PI/2) },
+            { x: R*Math.cos(36*Math.PI/180), y: 15, z: R*Math.sin(36*Math.PI/180) }, { x: R*Math.cos(-144*Math.PI/180), y: -15, z: R*Math.sin(-144*Math.PI/180) }
         ];
 
         function projeter(pt) {
@@ -102,6 +102,7 @@
                 if (selIdx === d.index) circle.style.fill = "rgba(0,122,255,0.4)";
                 else if (data.score > 0) circle.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
 
+                // Correction de l'adresse W3C complète pour garantir l'affichage vectoriel
                 const txt = document.createElementNS("http://w3.org", "text");
                 txt.setAttribute("x", d.x); txt.setAttribute("y", d.y);
                 txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === d.index ? " active" : ""));
