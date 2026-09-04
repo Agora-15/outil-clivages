@@ -2,49 +2,160 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Test 1 Face</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agora-15 | Modélisation</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #ffffff;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: sans-serif; overflow: hidden; user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden; overflow-y: auto; user-select: none;
         }
-        h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
-        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; }
-        .scene { width: 320px; height: 320px; margin-top: 20px; display: flex; align-items: center; justify-content: center; }
-        svg { width: 100%; height: 100%; }
-        /* Style brute du losange de test */
-        .test-face {
-            fill: #007aff;
-            stroke: #0056b3;
-            stroke-width: 2;
-            cursor: pointer;
+        header { text-align: center; margin-top: 30px; margin-bottom: 20px; }
+        h1 { font-size: 26px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin: 0; }
+        .sub { font-size: 14px; color: #8e8e93; margin-top: 5px; }
+        
+        /* Grille adaptative pour afficher les 12 faces proprement */
+        .grille-clivages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px; width: 90%; max-width: 700px;
+            padding: 10px; box-sizing: border-box;
+            margin-bottom: 120px;
         }
-        .face-text {
-            font-size: 12px;
-            font-weight: bold;
-            fill: #ffffff;
-            text-anchor: middle;
-            dominant-baseline: central;
-            pointer-events: none;
+        
+        /* Design des boîtes de clivages */
+        .bloc-face {
+            background: #ffffff; border: 2px solid #007aff;
+            color: #1c1c1e; border-radius: 16px;
+            height: 90px; display: flex; align-items: center;
+            justify-content: center; text-align: center;
+            font-size: 13px; font-weight: 600; padding: 10px;
+            box-sizing: border-box; cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.03);
         }
+        .bloc-face:hover { background: rgba(0, 122, 255, 0.03); }
+        
+        /* Style des faces verrouillées en gris anthracite lisible */
+        .bloc-face.verrouille {
+            background: rgba(142, 142, 147, 0.15) !important;
+            color: #3a3a3a !important;
+            border-color: #8e8e93 !important;
+            cursor: not-allowed !important;
+            font-weight: 500;
+        }
+        
+        #control-widget {
+            position: fixed; bottom: 30px;
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #e5e5ea; padding: 15px 40px;
+            border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center; min-width: 280px;
+            opacity: 0; transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none; z-index: 100;
+        }
+        #control-widget.visible { opacity: 1; transform: translateY(0); }
+        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; }
+        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; margin-top: 4px; }
     </style>
 </head>
 <body>
-    <h1>Agora-15</h1>
-    <p>Étape de diagnostic : test d'affichage d'une seule face brute</p>
-    <div class="scene">
-        <svg viewBox="-100 -100 200 200">
 
-            <!-- Tracé vectoriel d'un losange parfait au centre -->
-            <polygon points="0,-60 50,0 0,60 -50,0" class="test-face" />
-            
-            <!-- Texte au centre exact (0,0) -->
-            <text x="0" y="0" class="face-text">GLOBALISME</text>
-        </svg>
+    <header>
+        <h1>Agora-15</h1>
+        <div class="sub">Sélectionnez une option, puis utilisez la molette de votre souris.</div>
+    </header>
+
+    <!-- La matrice des 12 clivages de votre projet -->
+    <div class="grille-clivages">
+        <div class="bloc-face" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+        <div class="bloc-face" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+        <div class="bloc-face" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+        <div class="bloc-face" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+        <div class="bloc-face" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+        <div class="bloc-face" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
+        <div class="bloc-face" id="f-femi" data-opp="f-patr" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
+        <div class="bloc-face" id="f-patr" data-opp="f-femi" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
+        <div class="bloc-face" id="f-esse" data-opp="f-cons" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
+        <div class="bloc-face" id="f-cons" data-opp="f-esse" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
+        <div class="bloc-face" id="f-roya" data-opp="f-repu" data-name="ROYALISME" data-score="0">ROYALISME</div>
+        <div class="bloc-face" id="f-repu" data-opp="f-roya" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
     </div>
+
+    <div id="control-widget">
+        <div class="widget-title" id="act-name">Clivage</div>
+        <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
+    </div>
+    <script>
+        const faces = document.querySelectorAll('.grille-clivages .bloc-face');
+        const widget = document.getElementById('control-widget');
+        const wTitle = document.getElementById('act-name');
+        let sel = null;
+
+        function rafraichirCouleurFace(f) {
+            const score = parseInt(f.getAttribute('data-score'));
+            const nomOrigine = f.getAttribute('data-name');
+            const opp = document.getElementById(f.getAttribute('data-opp'));
+            const nomOpposeOrigine = opp.getAttribute('data-name');
+            
+            if (score > 0) {
+                // Coloration de la boîte cliquée
+                f.style.background = `rgba(0, 122, 255, ${0.15 + (score * 0.085)})`;
+                f.style.color = score > 5 ? '#ffffff' : '#1c1c1e';
+                f.style.borderColor = '#0056b3';
+                f.innerText = nomOrigine + " : +" + score;
+                f.classList.remove('verrouille');
+
+                // Verrouillage de la boîte opposée et calcul de la force inverse
+                const scoreInverse = -(20 - score);
+                opp.classList.add('verrouille');
+                opp.innerText = nomOpposeOrigine + " : " + scoreInverse;
+                opp.style.background = ''; opp.style.color = '';
+                opp.setAttribute('data-score', '0');
+            } else {
+                // Remise à zéro
+                f.style.background = '#ffffff'; f.style.color = '#1c1c1e'; f.style.borderColor = '#007aff';
+                f.innerText = nomOrigine;
+                opp.classList.remove('verrouille');
+                opp.style.background = '#ffffff'; opp.style.color = '#1c1c1e'; opp.style.borderColor = '#007aff';
+                opp.innerText = nomOpposeOrigine;
+            }
+        }
+
+        faces.forEach(f => {
+            f.addEventListener('click', () => {
+                if (f.classList.contains('verrouille')) return;
+                
+                if (sel && sel !== f && !sel.classList.contains('verrouille')) {
+                    rafraichirCouleurFace(sel);
+                }
+                
+                sel = f;
+                if (parseInt(f.getAttribute('data-score')) === 0) {
+                    f.style.background = 'rgba(0, 122, 255, 0.3)';
+                }
+                
+                widget.classList.add('visible');
+                wTitle.innerText = f.getAttribute('data-name') + " (+" + f.getAttribute('data-score') + ")";
+            });
+        });
+
+        window.addEventListener('wheel', (e) => {
+            if (sel && !sel.classList.contains('verrouille')) {
+                e.preventDefault();
+                let score = parseInt(sel.getAttribute('data-score'));
+                score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
+                
+                sel.setAttribute('data-score', score);
+                rafraichirCouleurFace(sel);
+                wTitle.innerText = sel.getAttribute('data-name') + " (+" + score + ")";
+            }
+        }, { passive: false });
+    </script>
 </body>
 </html>
 
-            
+    
