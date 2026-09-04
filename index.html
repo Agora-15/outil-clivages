@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Dodécaèdre Stable</title>
+    <title>Agora-15 | Test 1 Face</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -11,137 +11,40 @@
             font-family: sans-serif; overflow: hidden; user-select: none;
         }
         h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
-        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
-        .scene { width: 340px; height: 320px; margin-top: 20px; display: flex; align-items: center; justify-content: center; }
+        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; }
+        .scene { width: 320px; height: 320px; margin-top: 20px; display: flex; align-items: center; justify-content: center; }
         svg { width: 100%; height: 100%; }
-        .face { fill: rgba(255,255,255,0.9); stroke: #007aff; stroke-width: 1.5; cursor: pointer; transition: all 0.2s; }
-        .face:hover { fill: rgba(0,122,255,0.05); }
-        .face.locked { fill: rgba(142,142,147,0.18)!important; stroke: #8e8e93!important; cursor: not-allowed!important; }
-        .face-text { font-size: 8px; font-weight: bold; fill: #1c1c1e; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .face-text.locked { fill: #4a4a4a!important; font-weight: 500; }
-        .face-text.active { fill: #ffffff!important; }
-        #control-widget {
-            position: absolute; bottom: 40px;
-            background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea;
-            padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            text-align: center; min-width: 280px; opacity: 0; transform: translateY(20px);
-            transition: all 0.4s; pointer-events: none;
+        /* Style brute du losange de test */
+        .test-face {
+            fill: #007aff;
+            stroke: #0056b3;
+            stroke-width: 2;
+            cursor: pointer;
         }
-        #control-widget.visible { opacity: 1; transform: translateY(0); }
-        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
-        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
+        .face-text {
+            font-size: 12px;
+            font-weight: bold;
+            fill: #ffffff;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Étape 7 : Dodécaèdre Rhombique à plat. Cliquez sur un losange, molette pour noter.</p>
+    <p>Étape de diagnostic : test d'affichage d'une seule face brute</p>
     <div class="scene">
-        <svg viewBox="-160 -160 320 320"><g id="poly-group"></g></svg>
-    </div>
-    <div id="control-widget">
-        <div class="widget-title" id="act-name">Clivage</div>
-        <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
-    </div>
+        <svg viewBox="-100 -100 200 200">
 
-
-
-    <script>
-        const canvas = document.getElementById('poly-group');
-        const widget = document.getElementById('control-widget');
-        const wTitle = document.getElementById('act-name');
-        let selIdx = null;
-
-        const clivages = [
-            { name: "GLOBALISME", opp: 1, score: 0, locked: false }, { name: "SOUVERAINISME", opp: 0, score: 0, locked: false },
-            { name: "ÉGALITARISME", opp: 3, score: 0, locked: false }, { name: "MÉRITOCRATIE", opp: 2, score: 0, locked: false },
-            { name: "TECHNOCRATIE", opp: 5, score: 0, locked: false }, { name: "POPULISME", opp: 4, score: 0, locked: false },
-            { name: "FÉMINISME", opp: 7, score: 0, locked: false }, { name: "PATRIARCAT", opp: 6, score: 0, locked: false },
-            { name: "ESSENTIALISME", opp: 9, score: 0, locked: false }, { name: "CONSTRUCTIVISME", opp: 8, score: 0, locked: false },
-            { name: "ROYALISME", opp: 11, score: 0, locked: false }, { name: "RÉPUBLICANISME", opp: 10, score: 0, locked: false }
-        ];
-
-        function dessiner() {
-            canvas.innerHTML = '';
+            <!-- Tracé vectoriel d'un losange parfait au centre -->
+            <polygon points="0,-60 50,0 0,60 -50,0" class="test-face" />
             
-            // L'algorithme calcule lui-même les 12 losanges parfaits en rosace autour du centre
-            for (let i = 0; i < 12; i++) {
-                const data = clivages[i];
-                
-                // Formule trigonométrique pour générer les 4 sommets de chaque losange
-                const angleCentre = (i * Math.PI * 2) / 12 - Math.PI / 2;
-                const angleSuivant = ((i + 1) * Math.PI * 2) / 12 - Math.PI / 2;
-                
-                const rExt = 130;
-                const rInt = 75;
-                const rNoyau = 35;
-
-                const x1 = rExt * Math.cos(angleCentre);
-                const y1 = rExt * Math.sin(angleCentre);
-                const x2 = rInt * Math.cos((angleCentre + angleSuivant) / 2);
-                const y2 = rInt * Math.sin((angleCentre + angleSuivant) / 2);
-                const x3 = rExt * Math.cos(angleSuivant);
-                const y3 = rExt * Math.sin(angleSuivant);
-                const x4 = rNoyau * Math.cos((angleCentre + angleSuivant) / 2);
-                const y4 = rNoyau * Math.sin((angleCentre + angleSuivant) / 2);
-
-                const poly = document.createElementNS("http://w3.org", "polygon");
-                poly.setAttribute("points", `${x1},${y1} ${x2},${y2} ${x3},${y3} ${x4},${y4}`);
-                poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
-                
-                if (selIdx === i) poly.style.fill = "rgba(0,122,255,0.4)";
-                else if (data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
-
-                // Centre géométrique du losange pour positionner le texte
-                const cx = (x1 + x2 + x3 + x4) / 4;
-                const cy = (y1 + y2 + y3 + y4) / 4;
-
-                const txt = document.createElementNS("http://w3.org", "text");
-                txt.setAttribute("x", cx); txt.setAttribute("y", cy);
-                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === i ? " active" : ""));
-                
-                let label = data.name;
-                if (data.locked) label += " : " + data.score;
-                else if (data.score > 0) label += " : +" + data.score;
-                txt.textContent = label;
-
-                poly.addEventListener('click', () => {
-                    if (data.locked) return;
-                    selIdx = i;
-                    widget.classList.add('visible');
-                    wTitle.textContent = data.name + " (+" + data.score + ")";
-                    dessiner();
-                });
-
-                canvas.appendChild(poly);
-                canvas.appendChild(txt);
-            }
-        }
-        
-        dessiner();
-
-        window.addEventListener('wheel', (e) => {
-            if (selIdx !== null && !clivages[selIdx].locked) {
-                e.preventDefault();
-                let s = clivages[selIdx].score;
-                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
-                
-                clivages[selIdx].score = s;
-                const oppIdx = clivages[selIdx].opp;
-                
-                if (s > 0) {
-                    clivages[oppIdx].score = -(20 - s);
-                    clivages[oppIdx].locked = true;
-                } else {
-                    clivages[oppIdx].score = 0;
-                    clivages[oppIdx].locked = false;
-                }
-                
-                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")";
-                dessiner();
-            }
-        }, { passive: false });
-    </script>
+            <!-- Texte au centre exact (0,0) -->
+            <text x="0" y="0" class="face-text">GLOBALISME</text>
+        </svg>
+    </div>
 </body>
 </html>
 
-    
+            
