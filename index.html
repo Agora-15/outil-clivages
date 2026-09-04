@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Modélisation Moléculaire : 30 disques (Ceinture de 10 cercles alternés, sans pôles).</p>
+    <p>Modélisation Moléculaire : Étape 1 - Suppression des 2 pôles horizontaux.</p>
     <div class="scene" id="scene">
         <svg viewBox="-170 -160 340 340"><g id="poly-group"></g></svg>
     </div>
@@ -56,19 +56,16 @@
 
         const g = 1.618, R = 120;
         const directions = [
-            // Les 20 vecteurs tridimensionnels originaux d'or de votre code de base
             { x: R, y: 0, z: R/g }, { x: -R, y: 0, z: -R/g }, { x: R/g, y: R, z: 0 }, { x: -R/g, y: -R, z: 0 },
             { x: 0, y: R/g, z: R }, { x: 0, y: -R/g, z: -R }, { x: R, y: 0, z: -R/g }, { x: -R, y: 0, z: R/g },
             { x: R/g, y: -R, z: 0 }, { x: -R/g, y: R, z: 0 }, { x: 0, y: R/g, z: -R }, { x: 0, y: -R/g, z: R },
             { x: R/g, y: R/g, z: R/g }, { x: -R/g, y: -R/g, z: -R/g }, { x: R/g, y: R/g, z: -R/g }, { x: -R/g, y: -R/g, z: R/g },
             { x: R/g, y: -R/g, z: R/g }, { x: -R/g, y: R/g, z: -R/g }, { x: R/g, y: -R/g, z: -R/g }, { x: -R/g, y: R/g, z: R/g },
-            
-            // Correction : Les 2 axes horizontaux purs supprimés. La ceinture contient désormais 10 cercles (2 niveaux alternés de 5)
-            { x: R*Math.cos(0), y: 15, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: -15, z: R*Math.sin(Math.PI) },
-            { x: R*Math.cos(Math.PI/4), y: 15, z: R*Math.sin(Math.PI/4) }, { x: R*Math.cos(-3*Math.PI/4), y: -15, z: R*Math.sin(-3*Math.PI/4) },
-            { x: R*Math.cos(-Math.PI/4), y: 15, z: R*Math.sin(-Math.PI/4) }, { x: R*Math.cos(3*Math.PI/4), y: -15, z: R*Math.sin(3*Math.PI/4) },
-            { x: R*Math.cos(Math.PI/2), y: 15, z: R*Math.sin(Math.PI/2) }, { x: R*Math.cos(-Math.PI/2), y: -15, z: R*Math.sin(-Math.PI/2) },
-            { x: R*Math.cos(36*Math.PI/180), y: 15, z: R*Math.sin(36*Math.PI/180) }, { x: R*Math.cos(-144*Math.PI/180), y: -15, z: R*Math.sin(-144*Math.PI/180) }
+            // Correction : Les 2 axes verticaux polaires purs ont été supprimés. Reste les 8 cercles de la ceinture équatoriale.
+            { x: R*Math.cos(0), y: 0, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: 0, z: R*Math.sin(Math.PI) },
+            { x: R*Math.cos(Math.PI/4), y: 0, z: R*Math.sin(Math.PI/4) }, { x: R*Math.cos(-3*Math.PI/4), y: 0, z: R*Math.sin(-3*Math.PI/4) },
+            { x: R*Math.cos(-Math.PI/4), y: 0, z: R*Math.sin(-Math.PI/4) }, { x: R*Math.cos(3*Math.PI/4), y: 0, z: R*Math.sin(3*Math.PI/4) },
+            { x: R*Math.cos(Math.PI/2), y: 0, z: R*Math.sin(Math.PI/2) }, { x: R*Math.cos(-Math.PI/2), y: 0, z: R*Math.sin(-Math.PI/2) }
         ];
 
         function projeter(pt) {
@@ -102,7 +99,6 @@
                 if (selIdx === d.index) circle.style.fill = "rgba(0,122,255,0.4)";
                 else if (data.score > 0) circle.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
 
-                // Correction de l'adresse W3C complète pour garantir l'affichage vectoriel
                 const txt = document.createElementNS("http://w3.org", "text");
                 txt.setAttribute("x", d.x); txt.setAttribute("y", d.y);
                 txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === d.index ? " active" : ""));
