@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Modèle Rhombique Final</title>
+    <title>Agora-15 | 30 Faces Stables</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Géométrie 30 Clivages : Ceinture de 10 cercles (2 niveaux de 5 alternés) et 0 pôle horizontal.</p>
+    <p>Triacontaèdre Rhombique : Ceinture de 10 cercles (2 niveaux de 5 alternés), 0 pôle horizontal.</p>
     <div class="scene" id="scene">
         <svg viewBox="-170 -160 340 340"><g id="poly-group"></g></svg>
     </div>
@@ -36,7 +36,6 @@
         const canvas = document.getElementById('poly-group'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('act-name');
         let drag = false, rX = -20, rY = 20, cX = -20, cY = 20, vX = 0, vY = 0, lX = 0, lY = 0, selIdx = null;
 
-        // La table complète des 15 duos d'Agora-15 associée aux 30 indices physiques de l'objet
         const clivages = [
             { name: "GLOBALISME", opp: 1, score: 0, locked: false }, { name: "SOUVERAINISME", opp: 0, score: 0, locked: false },
             { name: "ÉGALITARISME", opp: 3, score: 0, locked: false }, { name: "MÉRITOCRATIE", opp: 2, score: 0, locked: false },
@@ -55,27 +54,22 @@
             { name: "SCIENTISME", opp: 29, score: 0, locked: false }, { name: "RELATIVISME SCIENTIFIQUE", opp: 28, score: 0, locked: false }
         ];
 
-        // Calcul automatique des 30 coordonnées tridimensionnelles (6 couronnes de 5 cercles)
-        const directions = [];
-        const R = 125; // Rayon de déploiement
-        
-        // Les 6 latitudes exactes induites par la règle d'or (incluant les 2 niveaux de la ceinture centrale à +-18°)
-        const latitudes = [79.19, 52.62, 18.0, -18.0, -52.62, -79.19];
-        
-        latitudes.forEach((lat, cIdx) => {
-            const phi = lat * Math.PI / 180;
-            // Alternance géométrique stricte de 36° entre les niveaux pour l'imbrication d'or
-            const offset = (cIdx % 2) * (36 * Math.PI / 180); 
+        const g = 1.618, R = 120;
+        const directions = [
+            // 20 Vecteurs d'or tridimensionnels originaux conservés
+            { x: R, y: 0, z: R/g }, { x: -R, y: 0, z: -R/g }, { x: R/g, y: R, z: 0 }, { x: -R/g, y: -R, z: 0 },
+            { x: 0, y: R/g, z: R }, { x: 0, y: -R/g, z: -R }, { x: R, y: 0, z: -R/g }, { x: -R, y: 0, z: R/g },
+            { x: R/g, y: -R, z: 0 }, { x: -R/g, y: R, z: 0 }, { x: 0, y: R/g, z: -R }, { x: 0, y: -R/g, z: R },
+            { x: R/g, y: R/g, z: R/g }, { x: -R/g, y: -R/g, z: -R/g }, { x: R/g, y: R/g, z: -R/g }, { x: -R/g, y: -R/g, z: R/g },
+            { x: R/g, y: -R/g, z: R/g }, { x: -R/g, y: R/g, z: -R/g }, { x: R/g, y: -R/g, z: -R/g }, { x: -R/g, y: R/g, z: R/g },
             
-            for (let i = 0; i < 5; i++) {
-                const theta = (i * 72 * Math.PI / 180) + offset;
-                directions.push({
-                    x: R * Math.cos(phi) * Math.cos(theta),
-                    y: R * Math.sin(phi),
-                    z: R * Math.cos(phi) * Math.sin(theta)
-                });
-            }
-        });
+            // Correction : Ceinture de 10 cercles verticaux (2 niveaux de 5 alternés sans pôles horizontaux)
+            { x: R*Math.cos(0), y: 15, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: -15, z: R*Math.sin(Math.PI) },
+            { x: R*Math.cos(72*Math.PI/180), y: 15, z: R*Math.sin(72*Math.PI/180) }, { x: R*Math.cos(-108*Math.PI/180), y: -15, z: R*Math.sin(-108*Math.PI/180) },
+            { x: R*Math.cos(144*Math.PI/180), y: 15, z: R*Math.sin(144*Math.PI/180) }, { x: R*Math.cos(-36*Math.PI/180), y: -15, z: R*Math.sin(-36*Math.PI/180) },
+            { x: R*Math.cos(-144*Math.PI/180), y: 15, z: R*Math.sin(-144*Math.PI/180) }, { x: R*Math.cos(36*Math.PI/180), y: -15, z: R*Math.sin(36*Math.PI/180) },
+            { x: R*Math.cos(-72*Math.PI/180), y: 15, z: R*Math.sin(-72*Math.PI/180) }, { x: R*Math.cos(108*Math.PI/180), y: -15, z: R*Math.sin(108*Math.PI/180) }
+        ];
 
         function projeter(pt) {
             const radX = rX * Math.PI / 180, radY = rY * Math.PI / 180;
@@ -96,7 +90,6 @@
                 listeDisques.push({ index: index, x: p.x, y: p.y, z: p.z });
             });
 
-            // Tri par profondeur pour éliminer les parasites visuels
             listeDisques.sort((a, b) => a.z - b.z);
 
             listeDisques.forEach(d => {
