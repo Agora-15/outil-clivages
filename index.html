@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agora-15 | Modélisation des Clivages</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #info-overlay {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+            color: #1c1c1e;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 14px;
+            color: #8e8e93;
+            margin: 0;
+        }
+
+        #control-widget {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5ea;
+            padding: 20px 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: none;
+            text-align: center;
+            min-width: 300px;
+            z-index: 10;
+        }
+
+        .widget-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1c1c1e;
+        }
+
+        .scroll-instruction {
+            font-size: 12px;
+            color: #007aff;
+            margin-top: 10px;
+        }
+    </style>
+    <!-- LIENS CORRIGÉS ET COMPLETS POUR LA 3D -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body>
+
+    <div id="info-overlay">
+        <h1>Agora-15</h1>
+        <p>Explorez et cliquez sur une face pour interagir</p>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="control-widget">
+        <div class="widget-title" id="active-face-name">Clivage</div>
+        <div class="scroll-instruction">Utilisez la molette de votre souris pour ajuster votre force de conviction</div>
+    </div>
+
+    <script>
+        // --- 1. INITIALISATION DE LA SCÈNE 3D ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 8;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true;
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // --- 2. LES 15 CLIVAGES DU TRIACONTAÈDRE ---
+        const clivages = [
+            "Républicanisme", "Royalisme", "Technocratie", "Populisme", 
+            "Autoritarisme", "Libertarianisme", "Capitalisme", "Socialisme",
+            "Égalitarisme", "Méritocratie", "Libéralisme", "Protectionnisme",
+            "Féminisme", "Patriarcat", "Essentialisme", "Constructivisme",
+            "Universalisme", "Communautarisme", "Progressisme", "Conservatisme",
+            "Technosolutionnisme", "Radicalité écologique", "Écocentrisme", "Anthropocentrisme",
+            "Globalisme", "Souverainisme", "Ouverture", "Fermeture",
+            "Scientisme", "Relativisme scientifique"
+        ];
+
+        const solidGroup = new THREE.Group();
+        scene.add(solidGroup);
+
+        const facesMesh = [];
+
+        // Génération des 30 zones interactives externes
+        for (let i = 0; i < 30; i++) {
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xf2f2f7,
+                transparent: true,
+                opacity: 0.25,
+                side: THREE.DoubleSide
+            });
+            
+            const subGeom = new THREE.SphereGeometry(2, 8, 8, (i * (Math.PI * 2 / 30)), (Math.PI * 2 / 30));
+            const mesh = new THREE.Mesh(subGeom, material);
+            mesh.userData = { id: i, name: clivages[i], score: 0 };
+            solidGroup.add(mesh);
+            facesMesh.push(mesh);
+
+            const wireframeGeom = new THREE.EdgesGeometry(subGeom);
+            const wireframeMat = new THREE.LineBasicMaterial({ color: 0xd1d1d6, linewidth: 1 });
+            const wireframe = new THREE.LineSegments(wireframeGeom, wireframeMat);
+            solidGroup.add(wireframe);
+        }
+
+        // --- 3. GESTION DES CLICS ET DE LA MOLETTE (CODE ENTIER ET FERMÉ) ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let selectedFace = null;
+
+        window.addEventListener('click', (event) => {
+            // Ignorer le clic si on clique sur le widget d'intensité du bas
+            if (event.clientY > window.innerHeight - 120 && event.clientX > window.innerWidth/2 - 150 && event.clientX < window.innerWidth/2 + 150) {
+                return;
+            }
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(solidGroup.children);
+
+            const validIntersects = intersects.filter(hit => hit.object.userData && hit.object.userData.name);
+
+            if (validIntersects.length > 0) {
+                if(selectedFace) {
+                    selectedFace.material.color.setHex(0xf2f2f7);
+                }
+                
+                selectedFace = validIntersects[0].object;
+                selectedFace.material.color.setHex(0x007aff);
+                selectedFace.material.opacity = 0.5;
+
+                document.getElementById('control-widget').style.display = 'block';
+                document.getElementById('active-face-name').innerText = selectedFace.userData.name + " (Score : " + selectedFace.userData.score + ")";
+            }
+        });
+
+        window.addEventListener('wheel', (event) => {
+            if (selectedFace) {
+                controls.enableZoom = false; 
+                
+                let change = event.deltaY < 0 ? 1 : -1;
+                selectedFace.userData.score = Math.min(Math.max(selectedFace.userData.score + change, 0), 10);
+                
+                selectedFace.material.opacity = 0.25 + (selectedFace.userData.score * 0.07);
+                document.getElementById('active-face-name').innerText = selectedFace.userData.name + " : +" + selectedFace.userData.score;
+                
+                setTimeout(() => { controls.enableZoom = true; }, 200);
+            }
+        });
+
+        // --- 4. BOUCLE DE RENDU ---
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (!selectedFace) {
+                solidGroup.rotation.y += 0.0015;
+                solidGroup.rotation.x += 0.0008;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
