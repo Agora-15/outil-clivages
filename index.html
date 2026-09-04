@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Couronne 8 Faces</title>
+    <title>Agora-15 | Les 30 Clivages</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -14,7 +14,7 @@
         h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
         p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
         
-        .scene { width: 300px; height: 300px; perspective: 700px; margin-top: 20px; cursor: grab; }
+        .scene { width: 340px; height: 340px; perspective: 800px; margin-top: 20px; cursor: grab; }
         .scene:active { cursor: grabbing; }
         
         .structure {
@@ -23,16 +23,17 @@
             transform: rotateX(-20deg) rotateY(20deg);
         }
         
+        /* Les cercles miniatures ultra-fins de 1/3 de taille (80px) */
         .face {
             position: absolute; width: 80px; height: 80px;
-            left: 110px; top: 110px;
+            left: 130px; top: 130px; /* Centrage exact dans la scène de 340px */
             border: 1.5px solid #007aff;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.88);
             color: #1c1c1e;
             display: flex; align-items: center; justify-content: center;
-            font-size: 8px; font-weight: bold; text-align: center;
-            box-sizing: border-box; padding: 5px;
+            font-size: 7.5px; font-weight: bold; text-align: center;
+            box-sizing: border-box; padding: 6px;
             backface-visibility: visible; cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -43,23 +44,13 @@
             border-color: #8e8e93 !important;
             cursor: not-allowed !important;
         }
-        
-        /* LES 8 FACES VERTICALES UNIQUES DE LA COURONNE (Angles stricts à 45°) */
-        .fV0  { transform: rotateY(   0deg) translateZ(100px); }
-        .fV1  { transform: rotateY( 180deg) translateZ(100px); }
-        .fV2  { transform: rotateY(  90deg) translateZ(100px); }
-        .fV3  { transform: rotateY( -90deg) translateZ(100px); }
-        .fV4  { transform: rotateY(  45deg) translateZ(100px); }
-        .fV5  { transform: rotateY(-135deg) translateZ(100px); }
-        .fV6  { transform: rotateY( -45deg) translateZ(100px); }
-        .fV7  { transform: rotateY( 135deg) translateZ(100px); }
 
         #control-widget {
             position: absolute; bottom: 40px;
             background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea;
             padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             text-align: center; min-width: 280px; opacity: 0; transform: translateY(20px);
-            transition: all 0.4s; pointer-events: none;
+            transition: all 0.4s; pointer-events: none; z-index: 100;
         }
         #control-widget.visible { opacity: 1; transform: translateY(0); }
         .widget-title { font-size: 15px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
@@ -69,81 +60,49 @@
 <body>
 
     <h1>Agora-15</h1>
-    <p>Couronne épurée : 8 disques verticaux uniques à 45° (4 duos d'opposés fondamentaux).</p>
+    <p>Modélisation Finale : Triacontaèdre Rhombique à 30 faces moléculaires.</p>
 
     <div class="scene" id="scene">
         <div class="structure" id="structure">
-            <!-- Habillage des 4 premiers duos cardinaux -->
-            <div class="face fV0" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
-            <div class="face fV1" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
-            <div class="face fV2" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
-            <div class="face fV3" id="face-3" data-opp="face-2" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
-            <div class="face fV4" id="face-4" data-opp="face-5" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
-            <div class="face fV5" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
-            <div class="face fV6" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
-            <div class="face fV7" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
+            <!-- Groupe 1 : Les 12 faces des couronnes principales (Coordonnées et Angles d'or) -->
+            <div class="face" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0" style="transform: rotateY(0deg) rotateX(26.57deg) translateZ(120px);">GLOBALISME</div>
+            <div class="face" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0" style="transform: rotateY(180deg) rotateX(-26.57deg) translateZ(120px);">SOUVERAINISME</div>
+            <div class="face" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0" style="transform: rotateY(72deg) rotateX(26.57deg) translateZ(120px);">ÉGALITARISME</div>
+            <div class="face" id="face-3" data-opp="face-2" data-name="MÉRITOCRATIE" data-score="0" style="transform: rotateY(-108deg) rotateX(-26.57deg) translateZ(120px);">MÉRITOCRATIE</div>
+            <div class="face" id="face-4" data-opp="face-5" data-name="TECHNOCRATIE" data-score="0" style="transform: rotateY(144deg) rotateX(26.57deg) translateZ(120px);">TECHNOCRATIE</div>
+            <div class="face" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0" style="transform: rotateY(-36deg) rotateX(-26.57deg) translateZ(120px);">POPULISME</div>
+            <div class="face" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0" style="transform: rotateY(-144deg) rotateX(26.57deg) translateZ(120px);">FÉMINISME</div>
+            <div class="face" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0" style="transform: rotateY(36deg) rotateX(-26.57deg) translateZ(120px);">PATRIARCAT</div>
+            <div class="face" id="face-8" data-opp="face-9" data-name="ESSENTIALISME" data-score="0" style="transform: rotateY(-72deg) rotateX(26.57deg) translateZ(120px);">ESSENTIALISME</div>
+            <div class="face" id="face-9" data-opp="face-8" data-name="CONSTRUCTIVISME" data-score="0" style="transform: rotateY(108deg) rotateX(-26.57deg) translateZ(120px);">CONSTRUCTIVISME</div>
+            <div class="face" id="face-10" data-opp="face-11" data-name="ROYALISME" data-score="0" style="transform: rotateY(0deg) rotateX(-26.57deg) translateZ(120px);">ROYALISME</div>
+            <div class="face" id="face-11" data-opp="face-10" data-name="RÉPUBLICANISME" data-score="0" style="transform: rotateY(180deg) rotateX(26.57deg) translateZ(120px);">RÉPUBLICANISME</div>
+
+            <!-- Groupe 2 : La couronne alternée décalée de 36° -->
+            <div class="face" id="face-12" data-opp="face-13" data-name="LIBÉRALISME" data-score="0" style="transform: rotateY(36deg) rotateX(26.57deg) translateZ(120px);">LIBÉRALISME</div>
+            <div class="face" id="face-13" data-opp="face-12" data-name="PROTECTIONNISME" data-score="0" style="transform: rotateY(-144deg) rotateX(-26.57deg) translateZ(120px);">PROTECTIONNISME</div>
+            <div class="face" id="face-14" data-opp="face-15" data-name="UNIVERSALISME" data-score="0" style="transform: rotateY(108deg) rotateX(26.57deg) translateZ(120px);">UNIVERSALISME</div>
+            <div class="face" id="face-15" data-opp="face-14" data-name="COMMUNAUTARISME" data-score="0" style="transform: rotateY(-72deg) rotateX(-26.57deg) translateZ(120px);">COMMUNAUTARISME</div>
+            <div class="face" id="face-16" data-opp="face-17" data-name="AUTORITARISME" data-score="0" style="transform: rotateY(-180deg) rotateX(26.57deg) translateZ(120px);">AUTORITARISME</div>
+            <div class="face" id="face-17" data-opp="face-16" data-name="LIBERTARIANISME" data-score="0" style="transform: rotateY(0deg) rotateX(-26.57deg) translateZ(120px);">LIBERTARIANISME</div>
+            <div class="face" id="face-18" data-opp="face-19" data-name="PROGRESSISME" data-score="0" style="transform: rotateY(-108deg) rotateX(26.57deg) translateZ(120px);">PROGRESSISME</div>
+            <div class="face" id="face-19" data-opp="face-18" data-name="CONSERVATISME" data-score="0" style="transform: rotateY(72deg) rotateX(-26.57deg) translateZ(120px);">CONSERVATISME</div>
+            <div class="face" id="face-20" data-opp="face-21" data-name="CAPITALISME" data-score="0" style="transform: rotateY(-36deg) rotateX(26.57deg) translateZ(120px);">CAPITALISME</div>
+            <div class="face" id="face-21" data-opp="face-20" data-name="SOCIALISME" data-score="0" style="transform: rotateY(144deg) rotateX(-26.57deg) translateZ(120px);">SOCIALISME</div>
+
+            <!-- Groupe 3 : Les axes polaires et transversaux supérieurs et inférieurs (Angles d'or à 58.28° et 90°) -->
+            <div class="face" id="face-22" data-opp="face-23" data-name="TECHNOSOLUTIONNISME" data-score="0" style="transform: rotateY(0deg) rotateX(58.28deg) translateZ(120px);">TECHNOSOLUTIONNISME</div>
+            <div class="face" id="face-23" data-opp="face-22" data-name="RADICALITÉ ÉCOLOGIQUE" data-score="0" style="transform: rotateY(180deg) rotateX(-58.28deg) translateZ(120px);">RADICALITÉ ÉC.</div>
+            <div class="face" id="face-24" data-opp="face-25" data-name="ÉCOCENTRISME" data-score="0" style="transform: rotateY(120deg) rotateX(58.28deg) translateZ(120px);">ÉCOCENTRISME</div>
+            <div class="face" id="face-25" data-opp="face-24" data-name="ANTHROPOCENTRISME" data-score="0" style="transform: rotateY(-60deg) rotateX(-58.28deg) translateZ(120px);">ANTHROPOCEN.</div>
+            <div class="face" id="face-26" data-opp="face-27" data-name="OUVERTURE" data-score="0" style="transform: rotateY(-120deg) rotateX(58.28deg) translateZ(120px);">OUVERTURE</div>
+            <div class="face" id="face-27" data-opp="face-26" data-name="FERMETURE" data-score="0" style="transform: rotateY(60deg) rotateX(-58.28deg) translateZ(120px);">FERMETURE</div>
+            <div class="face" id="face-28" data-opp="face-29" data-name="SCIENTISME" data-score="0" style="transform: rotateY(0deg) rotateX(90deg) translateZ(120px);">SCIENTISME</div>
+            <div class="face" id="face-29" data-opp="face-28" data-name="RELATIVISME SCIENTIFIQUE" data-score="0" style="transform: rotateY(0deg) rotateX(-90deg) translateZ(120px);">RELATIVISME SC.</div>
         </div>
     </div>
+
     <div id="control-widget">
         <div class="widget-title" id="active-face-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
-    <script>
-        const scene = document.getElementById('scene'), structure = document.getElementById('structure'), faces = document.querySelectorAll('.face'), widget = document.getElementById('control-widget'), widgetTitle = document.getElementById('active-face-name');
-        let drag = false, cibleX = -20, cibleY = 20, rotationX = -20, rotationY = 20, vitesseX = 0, vitesseY = 0, dernierX = 0, dernierY = 0, faceSelectionnee = null;
-
-        scene.addEventListener('mousedown', (e) => {
-            drag = true; vitesseX = 0; vitesseY = 0;
-            dernierX = e.clientX; dernierY = e.clientY;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!drag) return;
-            const deltaX = e.clientX - dernierX, deltaY = e.clientY - dernierY;
-            vitesseY = deltaX * 0.35; vitesseX = deltaY * 0.35;
-            cibleY += vitesseY; cibleX -= vitesseX;
-            dernierX = e.clientX; dernierY = e.clientY;
-        });
-
-        window.addEventListener('mouseup', () => { drag = false; });
-
-        function bouclePhysique() {
-            if (!drag) { vitesseX *= 0.975; vitesseY *= 0.975; cibleY += vitesseY; cibleX -= vitesseX; }
-            rotationX += (cibleX - rotationX) * 0.12; rotationY += (cibleY - rotationY) * 0.12;
-            structure.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-            requestAnimationFrame(bouclePhysique);
-        }
-        bouclePhysique();
-
-        function rafraichirCouleurFace(face) {
-            const score = parseInt(face.getAttribute('data-score')), nomOrigine = face.getAttribute('data-name'), faceOpposee = document.getElementById(face.getAttribute('data-opp')), nomOpposeOrigine = faceOpposee.getAttribute('data-name');
-            if (score > 0) {
-                face.style.background = `rgba(0, 122, 255, ${0.2 + (score * 0.07)})`; face.style.color = score > 5 ? '#ffffff' : '#1c1c1e'; face.style.borderColor = '#0056b3'; face.innerText = nomOrigine + " : +" + score; face.classList.remove('locked');
-                faceOpposee.classList.add('locked'); faceOpposee.innerText = nomOpposeOrigine + " : " + (-(20 - score)); faceOpposee.style.background = ''; faceOpposee.style.color = ''; faceOpposee.setAttribute('data-score', '0'); 
-            } else {
-                face.style.background = 'rgba(255, 255, 255, 0.85)'; face.style.color = '#1c1c1e'; face.style.borderColor = '#007aff'; face.innerText = nomOrigine;
-                faceOpposee.classList.remove('locked'); faceOpposee.style.background = 'rgba(255, 255, 255, 0.85)'; faceOpposee.style.color = '#1c1c1e'; faceOpposee.style.borderColor = '#007aff'; faceOpposee.innerText = nomOpposeOrigine;
-            }
-        }
-
-        faces.forEach(face => {
-            face.addEventListener('click', () => {
-                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3 || face.classList.contains('locked')) return;
-                if (faceSelectionnee && faceSelectionnee !== face && !faceSelectionnee.classList.contains('locked')) rafraichirCouleurFace(faceSelectionnee);
-                faceSelectionnee = face;
-                if (parseInt(face.getAttribute('data-score')) === 0) face.style.background = 'rgba(0, 122, 255, 0.4)';
-                widget.classList.add('visible'); widgetTitle.innerText = face.getAttribute('data-name') + " (+" + face.getAttribute('data-score') + ")";
-            });
-        });
-
-        window.addEventListener('wheel', (e) => {
-            if (faceSelectionnee && !faceSelectionnee.classList.contains('locked')) {
-                e.preventDefault(); let score = parseInt(faceSelectionnee.getAttribute('data-score'));
-                score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
-                faceSelectionnee.setAttribute('data-score', score); rafraichirCouleurFace(faceSelectionnee);
-                widgetTitle.innerText = faceSelectionnee.getAttribute('data-name') + " (+" + score + ")";
-            }
-        }, { passive: false });
-    </script>
-</body>
-</html>
