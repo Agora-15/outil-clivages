@@ -2,45 +2,37 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Dodécaèdre Rhombique</title>
+    <title>Agora-15 | Dodécaèdre</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
-        p { position:absolute; top:80px; color:#8e8e93; font-size:14px; text-align:center; padding:0 20px; }
-        .scene { width:320px; height:320px; margin-top:20px; cursor:grab; display:flex; align-items:center; justify-content:center; }
+        p { position:absolute; top:80px; color:#8e8e93; font-size:14px; text-align:center; }
+        .scene { width:320px; height:320px; margin-top:20px; cursor:grab; }
         .scene:active { cursor:grabbing; }
         svg { width:100%; height:100%; }
-        .face { fill:rgba(255,255,255,0.9); stroke:#007aff; stroke-width:2; cursor:pointer; transition:fill 0.2s, stroke 0.2s; }
+        .face { fill:rgba(255,255,255,0.9); stroke:#007aff; stroke-width:2; cursor:pointer; transition:all 0.2s; }
         .face:hover { fill:rgba(0,122,255,0.05); }
         .face.locked { fill:rgba(142,142,147,0.18)!important; stroke:#8e8e93!important; cursor:not-allowed!important; }
-        .face-text { font-size:11px; font-weight:bold; fill:#1c1c1e; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
+        .face-text { font-size:10px; font-weight:bold; fill:#1c1c1e; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
         .face-text.locked { fill:#4a4a4a!important; font-weight:500; }
         .face-text.active { fill:#ffffff!important; }
         #control-widget { position:absolute; bottom:40px; background:rgba(255,255,255,0.95); border:1px solid #e5e5ea; padding:15px 45px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,0.05); text-align:center; min-width:280px; opacity:0; transform:translateY(20px); transition:all 0.4s; pointer-events:none; }
         #control-widget.visible { opacity:1; transform:translateY(0); }
-        .widget-title { font-size:16px; font-weight:600; color:#1c1c1e; margin-bottom:4px; }
+        .widget-title { font-size:16px; font-weight:600; color:#1c1c1e; }
         .scroll-instruction { font-size:12px; color:#007aff; font-weight:500; }
     </style>
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Étape 7 : Dodécaèdre Rhombique (12 faces). Faites glisser pour tourner, molette pour noter.</p>
-
-    <div class="scene" id="scene">
-        <svg id="canvas" viewBox="-160 -160 320 320">
-            <g id="poly-group"></g>
-        </svg>
-    </div>
-
+    <p>Étape 7 : Dodécaèdre Rhombique à 12 faces complet à la souris.</p>
+    <div class="scene" id="scene"><svg viewBox="-160 -160 320 320"><g id="poly-group"></g></svg></div>
     <div id="control-widget">
         <div class="widget-title" id="act-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
-
     <script>
-        const canvas = document.getElementById('poly-group'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('active-face-name');
+        const canvas = document.getElementById('poly-group'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('act-name');
         let drag = false, rX = -20, rY = 20, cX = -20, cY = 20, vX = 0, vY = 0, lX = 0, lY = 0, selIdx = null;
-
         const clivages = [
             { name: "GLOBALISME", opp: 1, score: 0, locked: false }, { name: "SOUVERAINISME", opp: 0, score: 0, locked: false },
             { name: "ÉGALITARISME", opp: 3, score: 0, locked: false }, { name: "MÉRITOCRATIE", opp: 2, score: 0, locked: false },
@@ -49,116 +41,54 @@
             { name: "ESSENTIALISME", opp: 9, score: 0, locked: false }, { name: "CONSTRUCTIVISME", opp: 8, score: 0, locked: false },
             { name: "ROYALISME", opp: 11, score: 0, locked: false }, { name: "RÉPUBLICANISME", opp: 10, score: 0, locked: false }
         ];
-
-        // Mathématiques du Dodécaèdre Rhombique
-        const d = 100, h = d / Math.sqrt(2);
-        const sommets = [
-            [0,0,d], [0,0,-d], [d,0,0], [-d,0,0], [0,d,0], [0,-d,0],
-            [h,h,h], [h,h,-h], [h,-h,h], [h,-h,-h], [-h,h,h], [-h,h,-h], [-h,-h,h], [-h,-h,-h]
-        ];
-
-        // Génération algorithmique automatique des 12 faces pour éviter les erreurs de texte coupé
-        const facesIndex = [];
-        const combinaisons = [
-            {v:[0,2,4], s:[6,8,2,0]}, {v:[0,3,4], s:[10,12,3,0]}, {v:[0,2,5], s:[8,6,2,0]}, {v:[0,3,5], s:[12,10,3,0]},
-            {v:[1,2,4], s:[7,9,2,1]},  {v:[1,3,4], s:[11,13,3,1]}, {v:[1,2,5], s:[9,7,2,1]},  {v:[1,3,5], s:[13,11,3,1]},
-            {v:[4,2,0], s:[6,7,1,4]},  {v:[4,3,0], s:[10,11,1,4]}, {v:[5,2,0], s:[8,9,1,5]},  {v:[5,3,0], s:[12,13,1,5]}
-        ];
+        const v0={x:0,y:0,z:100}, v1={x:0,y:0,z:-100}, v2={x:100,y:0,z:0}, v3={x:-100,y:0,z:0}, v4={x:0,y:100,z:0}, v5={x:0,y:-100,z:0}, v6={x:70.7,y:70.7,z:70.7}, v7={x:70.7,y:70.7,z:-70.7}, v8={x:70.7,y:-70.7,z:70.7}, v9={x:70.7,y:-70.7,z:-70.7}, v10={x:-70.7,y:70.7,z:70.7}, v11={x:-70.7,y:70.7,z:-70.7}, v12={x:-70.7,y:-70.7,z:70.7}, v13={x:-70.7,y:-70.7,z:-70.7};
         
-        // Reconstitution mathématique pure des paires de losanges
-        facesIndex.push([0, 6, 2, 8], ,  ,  ,
- , [1, 13, 2, 11], [0, 12, 5, 10], [1, 11, 5, 13],
-,  [5, 8, 0, 12], ,  [5, 9, 1, 13]);
-
-        function projeter(x, y, z) {
-            const radX = rX * Math.PI / 180, radY = rY * Math.PI / 180;
-            const cosX = Math.cos(radX), sinX = Math.sin(radX);
-            const cosY = Math.cos(radY), sinY = Math.sin(radY);
-            const y1 = y * cosX - z * sinX;
-            const z1 = y * sinX + z * cosX;
-            const x2 = x * cosY + z1 * sinY;
+        function transformer(p) {
+            const rX=rX*Math.PI/180, rY=rY*Math.PI/180, cX=Math.cos(rX), sX=Math.sin(rX), cY=Math.cos(rY), sY=Math.sin(rY);
+            const y1=p.y*cX-p.z*sX, z1=p.y*sX+p.z*cX, x2=p.x*cY+z1*sY;
             return { x: x2, y: y1, z: z1 };
         }
-
         function dessiner() {
             canvas.innerHTML = '';
-            let listeFaces = [];
-
-            facesIndex.forEach((fIdx, index) => {
-                let pts = fIdx.map(i => projeter(...sommets[i]));
-                let zMoy = (pts[0].z + pts[1].z + pts[2].z + pts[3].z) / 4;
-                listeFaces.push({ index: index, pts: pts, zMoy: zMoy });
-            });
-
-            listeFaces.sort((a, b) => a.zMoy - b.zMoy);
-
-            listeFaces.forEach(f => {
-                const data = clivages[f.index];
-                const poly = document.createElementNS("http://w3.org", "polygon");
-                let pStr = f.pts.map(p => `${p.x},${p.y}`).join(' ');
-                poly.setAttribute("points", pStr);
-                poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
-                
-                if(selIdx === f.index) poly.style.fill = "rgba(0,122,255,0.4)";
+            const p0=transformer(v0), p1=transformer(v1), p2=transformer(v2), p3=transformer(v3), p4=transformer(v4), p5=transformer(v5), p6=transformer(v6), p7=transformer(v7), p8=transformer(v8), p9=transformer(v9), p10=transformer(v10), p11=transformer(v11), p12=transformer(v12), p13=transformer(v13);
+            const faces = [
+                { id: 0, pts: [p0, p6, p2, p8] }, { id: 1, pts: [p1, p7, p2, p9] }, { id: 2, pts: [p0, p10, p3, p12] }, { id: 3, pts: [p1, p11, p3, p13] },
+                { id: 4, pts: [p0, p6, p4, p10] }, { id: 5, pts: [p1, p7, p4, p11] }, { id: 6, pts: [p0, p8, p5, p12] }, { id: 7, pts: [p1, p9, p5, p13] },
+                { id: 8, pts: [p2, p6, p4, p7] }, { id: 9, pts: [p2, p8, p5, p9] }, { id: 10, pts: [p3, p10, p4, p11] }, { id: 11, pts: [p3, p12, p5, p13] }
+            ];
+            faces.forEach(f => f.zMoy = (f.pts.z + f.pts.z + f.pts.z + f.pts.z) / 4);
+            faces.sort((a, b) => a.zMoy - b.zMoy);
+            faces.forEach(f => {
+                const data = clivages[f.id], poly = document.createElementNS("http://w3.org", "polygon"), pStr = f.pts.map(p => `${p.x},${p.y}`).join(' ');
+                poly.setAttribute("points", pStr); poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
+                if(selIdx === f.id) poly.style.fill = "rgba(0,122,255,0.4)";
                 else if(data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
-
-                let cx = (f.pts[0].x + f.pts[1].x + f.pts[2].x + f.pts[3].x) / 4;
-                let cy = (f.pts[0].y + f.pts[1].y + f.pts[2].y + f.pts[3].y) / 4;
-
+                const cx = (f.pts.x + f.pts.x + f.pts.x + f.pts.x) / 4, cy = (f.pts.y + f.pts.y + f.pts.y + f.pts.y) / 4;
                 const txt = document.createElementNS("http://w3.org", "text");
-                txt.setAttribute("x", cx); txt.setAttribute("y", cy);
-                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === f.index ? " active" : ""));
-                
-                let label = data.name;
-                if(data.locked) label += " : " + data.score;
-                else if(data.score > 0) label += " : +" + data.score;
-                txt.textContent = label;
-
-                poly.addEventListener('click', () => {
-                    if (data.locked) return;
-                    selIdx = f.index;
-                    widget.classList.add('visible');
-                    wTitle.textContent = data.name + " (+" + data.score + ")";
-                    dessiner();
-                });
-
-                canvas.appendChild(poly);
-                canvas.appendChild(txt);
+                txt.setAttribute("x", cx); txt.setAttribute("y", cy); txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === f.id ? " active" : ""));
+                let lbl = data.name;
+                if(data.locked) lbl += " : " + data.score; else if(data.score > 0) lbl += " : +" + data.score;
+                txt.textContent = lbl;
+                poly.addEventListener('click', () => { if (data.locked) return; selIdx = f.id; widget.classList.add('visible'); wTitle.textContent = data.name + " (+" + data.score + ")"; dessiner(); });
+                canvas.appendChild(poly); canvas.appendChild(txt);
             });
         }
-
         document.getElementById('scene').addEventListener('mousedown', (e) => { drag = true; vX = 0; vY = 0; lX = e.clientX; lY = e.clientY; });
         window.addEventListener('mousemove', (e) => { if (!drag) return; vY = (e.clientX - lX) * 0.4; vX = (e.clientY - lY) * 0.4; cY += vY; cX -= vX; lX = e.clientX; lY = e.clientY; });
         window.addEventListener('mouseup', () => { drag = false; });
-        document.getElementById('scene').addEventListener('touchstart', (e) => { drag = true; vX = 0; vY = 0; lX = e.touches.clientX; lY = e.touches.clientY; }, { passive: true });
-        window.addEventListener('touchmove', (e) => { if (!drag) return; vY = (e.touches.clientX - lX) * 0.4; vX = (e.touches.clientY - lY) * 0.4; cY += vY; cX -= vX; lX = e.touches.clientX; lY = e.touches.clientY; }, { passive: true });
-        window.addEventListener('touchend', () => { drag = false; });
-
         function phys() {
             if (!drag) { vX *= 0.975; vY *= 0.975; cY += vY; cX -= vX; }
-            rX += (cX - rX) * 0.12; rY += (cY - rY) * 0.12;
-            dessiner();
-            requestAnimationFrame(phys);
+            rX += (cX - rX) * 0.12; rY += (cY - rY) * 0.12; dessiner(); requestAnimationFrame(phys);
         }
         phys();
-
         window.addEventListener('wheel', (e) => {
             if (selIdx !== null && !clivages[selIdx].locked) {
-                e.preventDefault();
-                let s = clivages[selIdx].score;
-                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
-                clivages[selIdx].score = s;
-
+                e.preventDefault(); let s = clivages[selIdx].score;
+                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0); clivages[selIdx].score = s;
                 const oppIdx = clivages[selIdx].opp;
-                if (s > 0) {
-                    clivages[oppIdx].score = -(20 - s);
-                    clivages[oppIdx].locked = true;
-                } else {
-                    clivages[oppIdx].score = 0;
-                    clivages[oppIdx].locked = false;
-                }
-                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")";
-                dessiner();
+                if (s > 0) { clivages[oppIdx].score = -(20 - s); clivages[oppIdx].locked = true; } 
+                else { clivages[oppIdx].score = 0; clivages[oppIdx].locked = false; }
+                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")"; dessiner();
             }
         }, { passive: false });
     </script>
