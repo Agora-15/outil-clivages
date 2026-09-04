@@ -2,88 +2,161 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agora-15 | Modélisation des 12 Clivages</title>
     <style>
-        body,html{margin:0;padding:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;overflow:hidden;user-select:none;}
-        h1{position:absolute;top:30px;text-transform:uppercase;letter-spacing:2px;font-weight:300;}
-        p{position:absolute;top:80px;color:#8e8e93;font-size:14px;text-align:center;}
-        .scene{width:240px;height:240px;perspective:600px;margin-top:20px;cursor:grab;}
-        .sphere{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(20deg);}
-        .face{position:absolute;width:240px;height:240px;border:1.5px solid #007aff;border-radius:50%;background:rgba(255,255,255,0.85);color:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;text-align:center;box-sizing:border-box;padding:20px;backface-visibility:visible;cursor:pointer;transition:all 0.2s;}
-        .face.locked{background:rgba(142,142,147,0.18)!important;color:#4a4a4a!important;border-color:#8e8e93!important;cursor:not-allowed!important;}
-        .f0{transform:rotateY(0deg) translateZ(120px);}.f1{transform:rotateY(180deg) translateZ(120px);}
-        .f2{transform:rotateY(90deg) translateZ(120px);}.f3{transform:rotateY(-90deg) translateZ(120px);}
-        .f4{transform:rotateX(90deg) translateZ(120px);}.f5{transform:rotateX(-90deg) translateZ(120px);}
-        .f6{transform:rotateY(45deg) translateZ(120px);}.f7{transform:rotateY(-135deg) translateZ(120px);}
-        .f8{transform:rotateY(-45deg) translateZ(120px);}.f9{transform:rotateY(135deg) translateZ(120px);}
-        .f10{transform:rotateX(45deg) translateZ(120px);}.f11{transform:rotateX(-135deg) translateZ(120px);}
-        #control-widget{position:absolute;bottom:40px;background:rgba(255,255,255,0.95);border:1px solid #e5e5ea;padding:15px 45px;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,0.05);text-align:center;min-width:280px;opacity:0;transform:translateY(20px);transition:all 0.4s;pointer-events:none;}
-        #control-widget.visible{opacity:1;transform:translateY(0);}
-        .widget-title{font-size:16px;font-weight:600;color:#1c1c1e;}
-        .scroll-instruction{font-size:12px;color:#007aff;}
+        body {
+            margin: 0; padding: 40px 20px; background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; flex-direction: column; align-items: center; user-select: none;
+        }
+        h1 { text-transform: uppercase; letter-spacing: 2px; font-weight: 300; margin-bottom: 5px; }
+        .instruction { color: #8e8e93; font-size: 14px; margin-bottom: 30px; text-align: center; }
+        
+        /* Conteneur vertical pour empiler les 6 paires de clivages */
+        .liste-axes {
+            display: flex; flex-direction: column; gap: 20px;
+            width: 100%; max-width: 600px; margin-bottom: 100px;
+        }
+        .ligne-axe {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f2f2f7; padding: 15px; border-radius: 12px; gap: 15px;
+        }
+        .item-face {
+            flex: 1; background: #ffffff; border: 2px solid #007aff;
+            border-radius: 8px; padding: 15px; text-align: center;
+            font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .item-face:hover { background: rgba(0, 122, 255, 0.02); }
+        
+        /* Style des faces verrouillées en gris anthracite */
+        .item-face.bloque {
+            background: #e5e5ea !important; color: #4a4a4a !important;
+            border-color: #8e8e93 !important; cursor: not-allowed !important; font-weight: 500;
+        }
+        .separateur { font-weight: 300; color: #8e8e93; font-size: 12px; }
+
+        #control-widget {
+            position: fixed; bottom: 30px; background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #e5e5ea; padding: 15px 40px; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center;
+            min-width: 280px; opacity: 0; transform: translateY(15px);
+            transition: all 0.3s; pointer-events: none; z-index: 100;
+        }
+        #control-widget.visible { opacity: 1; transform: translateY(0); }
+        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; }
+        .widget-sub { font-size: 12px; color: #007aff; font-weight: 500; margin-top: 4px; }
     </style>
 </head>
 <body>
+
     <h1>Agora-15</h1>
-    <p>Étape 7 : Modèle Sphérique (12 faces). Glissez pour tourner, molette pour noter.</p>
-    <div class="scene" id="scene">
-        <div class="sphere" id="sphere">
-            <div class="face f0" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
-            <div class="face f1" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
-            <div class="face f2" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
-            <div class="face f3" id="face-3" data-opp="face-2" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
-            <div class="face f4" id="face-4" data-opp="face-5" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
-            <div class="face f5" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
-            <div class="face f6" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
-            <div class="face f7" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
-            <div class="face f8" id="face-8" data-opp="face-9" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
-            <div class="face f9" id="face-9" data-opp="face-8" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
-            <div class="face f10" id="face-10" data-opp="face-11" data-name="ROYALISME" data-score="0">ROYALISME</div>
-            <div class="face f11" id="face-11" data-opp="face-10" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
+    <p class="instruction">Étape 7 : Modèle Linéaire Stable. Cliquez sur une option, molette pour noter.</p>
+
+    <div class="liste-axes">
+        <div class="ligne-axe">
+            <div class="item-face" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="separateur">🔀</div>
+            <div class="item-face" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+        </div>
+        <div class="ligne-axe">
+            <div class="item-face" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="separateur">🔀</div>
+            <div class="item-face" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+        </div>
+        <div class="ligne-axe">
+            <div class="item-face" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="separateur">🔀</div>
+            <div class="item-face" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
+        </div>
+        <div class="ligne-axe">
+            <div class="item-face" id="f-femi" data-opp="f-patr" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
+            <div class="separateur">🔀</div>
+            <div class="item-face" id="f-patr" data-opp="f-femi" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
+        </div>
+        <div class="ligne-axe">
+            <div class="item-face" id="f-esse" data-opp="f-cons" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
+            <div class="separateur">🔀</div>
+            <div class="item-face" id="f-cons" data-opp="f-esse" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
+        </div>
+        <div class="ligne-axe">
+            <div class="item-face" id="f-roya" data-opp="f-repu" data-name="ROYALISME" data-score="0">ROYALISME</div>
+            <div class="separateur">🔀</div>
+            <div class="item-face" id="f-repu" data-opp="f-roya" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
         </div>
     </div>
+
     <div id="control-widget">
-        <div class="widget-title" id="active-face-name">Clivage</div>
-        <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
+        <div class="widget-title" id="act-name">Clivage</div>
+        <div class="widget-sub">Faites tourner la molette pour ajuster</div>
     </div>
-    <script>
-        const scene=document.getElementById('scene'),sphere=document.getElementById('sphere'),faces=document.querySelectorAll('.face'),widget=document.getElementById('control-widget'),wTitle=document.getElementById('active-face-name');
-        let drag=false,cX=-20,cY=20,rX=-20,rY=20,vX=0,vY=0,lX=0,lY=0,sel=null;
-        scene.addEventListener('mousedown',(e)=>{drag=true;vX=0;vY=0;lX=e.clientX;lY=e.clientY;});
-        window.addEventListener('mousemove',(e)=>{if(!drag)return;cY+=(e.clientX-lX)*0.35;cX-=(e.clientY-lY)*0.35;lX=e.clientX;lY=e.clientY;});
-        window.addEventListener('mouseup',()=>{drag=false;});
-        function phys(){
-            if(!drag){vX*=0.975;vY*=0.975;cY+=vY;cX-=vX;}
-            rX+=(cX-rX)*0.12;rY+=(cY-rY)*0.12;
-            sphere.style.transform=`rotateX(${rX}deg) rotateY(${rY}deg)`;
-            requestAnimationFrame(phys);
-        }
-        phys();
-        function color(f){
-            const s=parseInt(f.getAttribute('data-score')),n=f.getAttribute('data-name'),opp=document.getElementById(f.getAttribute('data-opp')),oName=opp.getAttribute('data-name');
-            if(s>0){
-                f.style.background=`rgba(0,122,255,${0.2+(s*0.07)})`;f.style.color=s>5?'#fff':'#1c1c1e';f.style.borderColor='#0056b3';f.innerText=n+" : +"+s;f.classList.remove('locked');
-                opp.classList.add('locked');opp.innerText=oName+" : "+(-(20-s));opp.style.background='';opp.style.color='';opp.setAttribute('data-score','0');
-            }else{
-                f.style.background='rgba(255,255,255,0.85)';f.style.color='#1c1c1e';f.style.borderColor='#007aff';f.innerText=n;
-                opp.classList.remove('locked');opp.style.background='rgba(255,255,255,0.85)';opp.style.color='#1c1c1e';opp.style.borderColor='#007aff';opp.innerText=oName;
+
+
+        <script>
+        const faces = document.querySelectorAll('.item-face');
+        const widget = document.getElementById('control-widget');
+        const wTitle = document.getElementById('act-name');
+        let sel = null;
+
+        function rafraichirCouleurFace(f) {
+            const score = parseInt(f.getAttribute('data-score'));
+            const nomOrigine = f.getAttribute('data-name');
+            const opp = document.getElementById(f.getAttribute('data-opp'));
+            const nomOpposeOrigine = opp.getAttribute('data-name');
+            
+            if (score > 0) {
+                // Coloration progressive de la face sélectionnée en bleu intense
+                f.style.background = `rgba(0, 122, 255, ${0.15 + (score * 0.085)})`;
+                f.style.color = score > 5 ? '#ffffff' : '#1c1c1e';
+                f.style.borderColor = '#0056b3';
+                f.innerText = nomOrigine + " : +" + score;
+                f.classList.remove('bloque');
+
+                // Calcul dynamique et verrouillage de la face opposée (-14 si +6)
+                const scoreInverse = -(20 - score);
+                opp.classList.add('bloque');
+                opp.innerText = nomOpposeOrigine + " : " + scoreInverse;
+                opp.style.background = ''; opp.style.color = '';
+                opp.setAttribute('data-score', '0');
+            } else {
+                // Remise à l'état initial blanc si le score retombe à 0
+                f.style.background = '#ffffff'; f.style.color = '#1c1c1e'; f.style.borderColor = '#007aff';
+                f.innerText = nomOrigine;
+                opp.classList.remove('bloque');
+                opp.style.background = '#ffffff'; opp.style.color = '#1c1c1e'; opp.style.borderColor = '#007aff';
+                opp.innerText = nomOpposeOrigine;
             }
         }
-        faces.forEach(f=>{
-            f.addEventListener('click',()=>{
-                if(Math.abs(vX)>0.3||Math.abs(vY)>0.3||f.classList.contains('locked'))return;
-                if(sel&&sel!==f&&!sel.classList.contains('locked'))color(sel);
-                sel=f;if(parseInt(f.getAttribute('data-score'))===0)f.style.background='rgba(0,122,255,0.4)';
-                widget.classList.add('visible');wTitle.innerText=f.getAttribute('data-name')+" (+"+f.getAttribute('data-score')+")";
+
+        faces.forEach(f => {
+            f.addEventListener('click', () => {
+                if (f.classList.contains('bloque')) return;
+                
+                if (sel && sel !== f && !sel.classList.contains('bloque')) {
+                    rafraichirCouleurFace(sel);
+                }
+                
+                sel = f;
+                if (parseInt(f.getAttribute('data-score')) === 0) {
+                    f.style.background = 'rgba(0, 122, 255, 0.3)';
+                }
+                
+                widget.classList.add('visible');
+                wTitle.innerText = f.getAttribute('data-name') + " (+" + f.getAttribute('data-score') + ")";
             });
         });
-        window.addEventListener('wheel',(e)=>{
-            if(sel&&!sel.classList.contains('locked')){
-                e.preventDefault();let s=parseInt(sel.getAttribute('data-score'));
-                s=e.deltaY<0?Math.min(s+1,10):Math.max(s-1,0);sel.setAttribute('data-score',s);color(sel);
-                wTitle.innerText=sel.getAttribute('data-name')+" (+"+s+")";
+
+        window.addEventListener('wheel', (e) => {
+            if (sel && !sel.classList.contains('bloque')) {
+                e.preventDefault();
+                let score = parseInt(sel.getAttribute('data-score'));
+                score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
+                
+                sel.setAttribute('data-score', score);
+                rafraichirCouleurFace(sel);
+                wTitle.innerText = sel.getAttribute('data-name') + " (+" + score + ")";
             }
-        },{passive:false});
+        }, { passive: false });
     </script>
 </body>
 </html>
