@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Miroir Complet</title>
+    <title>Agora-15 | Miroir Dynamique</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
@@ -11,7 +11,10 @@
         .scene:active { cursor:grabbing; }
         .cube { width:100%; height:100%; position:relative; transform-style:preserve-3d; transform:rotateX(-20deg) rotateY(20deg); }
         .face { position:absolute; width:220px; height:220px; border:2px solid #007aff; background:rgba(255,255,255,0.9); color:#1c1c1e; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; text-align:center; box-sizing:border-box; padding:10px; backface-visibility:visible; cursor:pointer; transition:all 0.2s; }
-        .face.locked { background:rgba(142,142,147,0.15)!important; color:#aeaea3!important; border-color:#d1d1d6!important; cursor:not-allowed!important; }
+        
+        /* Correction : Texte plus foncé (#4a4a4a) sur fond grisé pour une lecture facile */
+        .face.locked { background:rgba(142,142,147,0.18)!important; color:#4a4a4a!important; border-color:#8e8e93!important; cursor:not-allowed!important; font-weight:500; }
+        
         .front  { transform:rotateY(0deg) translateZ(110px); }
         .back   { transform:rotateY(180deg) translateZ(110px); }
         .right  { transform:rotateY(90deg) translateZ(110px); }
@@ -26,7 +29,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Étape 6 : Renseignez un clivage. Son opposé affichera la valeur miroir (-14).</p>
+    <p>Étape 6.1 : Renseignez un clivage. Son opposé calcule sa force inverse en direct.</p>
     <div class="scene" id="scene">
         <div class="cube" id="cube">
             <div class="face front" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
@@ -48,8 +51,8 @@
         scene.addEventListener('mousedown', (e)=>{ drag=true; vX=0; vY=0; lX=e.clientX; lY=e.clientY; });
         window.addEventListener('mousemove', (e)=>{ if(!drag)return; const dX=e.clientX-lX, dY=e.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.clientX; lY=e.clientY; });
         window.addEventListener('mouseup', ()=>{ drag=false; });
-        scene.addEventListener('touchstart', (e)=>{ drag=true; vX=0; vY=0; lX=e.touches[0].clientX; lY=e.touches[0].clientY; }, {passive:true});
-        window.addEventListener('touchmove', (e)=>{ if(!drag)return; const dX=e.touches[0].clientX-lX, dY=e.touches[0].clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.touches[0].clientX; lY=e.touches[0].clientY; }, {passive:true});
+        scene.addEventListener('touchstart', (e)=>{ drag=true; vX=0; vY=0; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
+        window.addEventListener('touchmove', (e)=>{ if(!drag)return; const dX=e.touches.clientX-lX, dY=e.touches.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
         window.addEventListener('touchend', ()=>{ drag=false; });
 
         function phys() {
@@ -64,7 +67,10 @@
             const s=parseInt(f.getAttribute('data-score')), n=f.getAttribute('data-name'), opp=document.getElementById(f.getAttribute('data-opp')), oName=opp.getAttribute('data-name');
             if(s>0){
                 f.style.background=`rgba(0,122,255,${0.2+(s*0.07)})`; f.style.color=s>5?'#fff':'#1c1c1e'; f.style.borderColor='#0056b3'; f.innerText=n+" : +"+s; f.classList.remove('locked');
-                opp.classList.add('locked'); opp.innerText=oName+" : -"+(20-s); opp.style.background=''; opp.style.color=''; opp.setAttribute('data-score','0');
+                
+                // Correction de la formule : le calcul du miroir est maintenant totalement dynamique (20 - s)
+                const scoreInverse = -(20 - s);
+                opp.classList.add('locked'); opp.innerText=oName+" : "+scoreInverse; opp.style.background=''; opp.style.color=''; opp.setAttribute('data-score','0');
             }else{
                 f.style.background='rgba(255,255,255,0.9)'; f.style.color='#1c1c1e'; f.style.borderColor='#007aff'; f.innerText=n;
                 opp.classList.remove('locked'); opp.style.background='rgba(255,255,255,0.9)'; opp.style.color='#1c1c1e'; opp.style.borderColor='#007aff'; opp.innerText=oName;
