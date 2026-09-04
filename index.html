@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Modèle Moléculaire</title>
+    <title>Agora-15 | Modèle Moléculaire 12</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -44,6 +44,8 @@
             cursor: not-allowed !important;
         }
         
+        /* CORRECTIONS STRICTES DES AXES DU DODÉCAÈDRE (12 FACES AU TOTAL) */
+        /* Les 8 Faces Verticales de la Couronne (Espacées rigoureusement de 45°) */
         .fV0  { transform: rotateY(   0deg) translateZ(100px); }
         .fV1  { transform: rotateY( 180deg) translateZ(100px); }
         .fV2  { transform: rotateY(  90deg) translateZ(100px); }
@@ -52,22 +54,14 @@
         .fV5  { transform: rotateY(-135deg) translateZ(100px); }
         .fV6  { transform: rotateY( -45deg) translateZ(100px); }
         .fV7  { transform: rotateY( 135deg) translateZ(100px); }
-        .fV8  { transform: rotateY( 22.5deg) translateZ(100px); }
-        .fV9  { transform: rotateY(-157.5deg) translateZ(100px); }
-        .fV10 { transform: rotateY(-22.5deg) translateZ(100px); }
-        .fV11 { transform: rotateY(157.5deg) translateZ(100px); }
-        .fV12 { transform: rotateY( 67.5deg) translateZ(100px); }
-        .fV13 { transform: rotateY(-112.5deg) translateZ(100px); }
-        .fV14 { transform: rotateY(-67.5deg) translateZ(100px); }
-        .fV15 { transform: rotateY(112.5deg) translateZ(100px); }
         
+        /* Les 2 Faces Horizontales */
         .fH0  { transform: rotateX(  90deg) translateZ(100px); }
         .fH1  { transform: rotateX( -90deg) translateZ(100px); }
         
+        /* Les 2 Axes Inclinés Restants */
         .fA0  { transform: rotateX(  45deg) translateZ(100px); }
         .fA1  { transform: rotateX(-135deg) translateZ(100px); }
-        .fA2  { transform: rotateX( -45deg) translateZ(100px); }
-        .fA3  { transform: rotateX( 135deg) translateZ(100px); }
 
         #control-widget {
             position: absolute; bottom: 40px;
@@ -84,10 +78,11 @@
 <body>
 
     <h1>Agora-15</h1>
-    <p>Modèle Moléculaire : Cercles réduits d'un tiers.</p>
+    <p>Structure corrigée : 8 disques verticaux, 2 horizontaux, 2 inclinés (12 options).</p>
 
     <div class="scene" id="scene">
         <div class="structure" id="structure">
+            <!-- Habillage exact des 12 faces avec vos 6 premiers duos fondamentaux -->
             <div class="face fV0" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
             <div class="face fV1" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
             <div class="face fV2" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
@@ -96,20 +91,12 @@
             <div class="face fV5" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
             <div class="face fV6" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
             <div class="face fV7" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
-            <div class="face fV8" id="face-8" data-opp="face-9" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
-            <div class="face fV9" id="face-9" data-opp="face-8" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
-            <div class="face fV10" id="face-10" data-opp="face-11" data-name="ROYALISME" data-score="0">ROYALISME</div>
-            <div class="face fV11" id="face-11" data-opp="face-10" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
-            <div class="face fV12" id="face-12" data-opp="face-13" data-name="LIBÉRALISME" data-score="0">LIBÉRALISME</div>
-            <div class="face fV13" id="face-13" data-opp="face-12" data-name="PROTECTIONNISME" data-score="0">PROTECTIONNISME</div>
-            <div class="face fV14" id="face-14" data-opp="face-15" data-name="UNIVERSALISME" data-score="0">UNIVERSALISME</div>
-            <div class="face fV15" id="face-15" data-opp="face-14" data-name="COMMUNAUTARISME" data-score="0">COMMUNAUTARISME</div>
-            <div class="face fH0" id="face-16" data-opp="face-17" data-name="AUTORITARISME" data-score="0">AUTORITARISME</div>
-            <div class="face fH1" id="face-17" data-opp="face-16" data-name="LIBERTARIANISME" data-score="0">LIBERTARIANISME</div>
-            <div class="face fA0" id="face-18" data-opp="face-19" data-name="PROGRESSISME" data-score="0">PROGRESSISME</div>
-            <div class="face fA1" id="face-19" data-opp="face-18" data-name="CONSERVATISME" data-score="0">CONSERVATISME</div>
-            <div class="face fA2" id="face-20" data-opp="face-21" data-name="CAPITALISME" data-score="0">CAPITALISME</div>
-            <div class="face fA3" id="face-21" data-opp="face-20" data-name="SOCIALISME" data-score="0">SOCIALISME</div>
+            
+            <div class="face fH0" id="face-8" data-opp="face-9" data-name="AUTORITARISME" data-score="0">AUTORITARISME</div>
+            <div class="face fH1" id="face-9" data-opp="face-8" data-name="LIBERTARIANISME" data-score="0">LIBERTARIANISME</div>
+            
+            <div class="face fA0" id="face-10" data-opp="face-11" data-name="PROGRESSISME" data-score="0">PROGRESSISME</div>
+            <div class="face fA1" id="face-11" data-opp="face-10" data-name="CONSERVATISME" data-score="0">CONSERVATISME</div>
         </div>
     </div>
     <div id="control-widget">
