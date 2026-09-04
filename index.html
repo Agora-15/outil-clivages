@@ -2,22 +2,20 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Socle Stable</title>
+    <title>Agora-15 | Dodécaèdre 12 Faces</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
-        p { position:absolute; top:80px; color:#8e8e93; font-size:14px; text-align:center; }
-        .scene { width:220px; height:220px; perspective:600px; margin-top:20px; cursor:grab; }
+        p { position:absolute; top:80px; color:#8e8e93; font-size:14px; text-align:center; padding:0 20px; }
+        .scene { width:320px; height:320px; margin-top:20px; cursor:grab; display:flex; align-items:center; justify-content:center; }
         .scene:active { cursor:grabbing; }
-        .cube { width:100%; height:100%; position:relative; transform-style:preserve-3d; transform:rotateX(-20deg) rotateY(20deg); }
-        .face { position:absolute; width:220px; height:220px; border:2px solid #007aff; background:rgba(255,255,255,0.9); color:#1c1c1e; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; text-align:center; box-sizing:border-box; padding:10px; backface-visibility:visible; cursor:pointer; transition:all 0.2s; }
-        .face.locked { background:rgba(142,142,147,0.18)!important; color:#4a4a4a!important; border-color:#8e8e93!important; cursor:not-allowed!important; font-weight:500; }
-        .front  { transform:rotateY(0deg) translateZ(110px); }
-        .back   { transform:rotateY(180deg) translateZ(110px); }
-        .right  { transform:rotateY(90deg) translateZ(110px); }
-        .left   { transform:rotateY(-90deg) translateZ(110px); }
-        .top    { transform:rotateX(90deg) translateZ(110px); }
-        .bottom { transform:rotateX(-90deg) translateZ(110px); }
+        svg { width:100%; height:100%; }
+        .face { fill:rgba(255,255,255,0.9); stroke:#007aff; stroke-width:2; cursor:pointer; transition:fill 0.2s, stroke 0.2s; }
+        .face:hover { fill:rgba(0,122,255,0.05); }
+        .face.locked { fill:rgba(142,142,147,0.18)!important; stroke:#8e8e93!important; cursor:not-allowed!important; }
+        .face-text { font-size:11px; font-weight:bold; fill:#1c1c1e; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
+        .face-text.locked { fill:#4a4a4a!important; font-weight:500; }
+        .face-text.active { fill:#ffffff!important; }
         #control-widget { position:absolute; bottom:40px; background:rgba(255,255,255,0.95); border:1px solid #e5e5ea; padding:15px 45px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,0.05); text-align:center; min-width:280px; opacity:0; transform:translateY(20px); transition:all 0.4s; pointer-events:none; }
         #control-widget.visible { opacity:1; transform:translateY(0); }
         .widget-title { font-size:16px; font-weight:600; color:#1c1c1e; margin-bottom:4px; }
@@ -26,68 +24,141 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Socle de base validé : Renseignez un clivage. Son opposé calcule sa force inverse en direct.</p>
+    <p>Étape 7 : Dodécaèdre Rhombique (12 faces). Faites glisser pour tourner, molette pour noter.</p>
+
     <div class="scene" id="scene">
-        <div class="cube" id="cube">
-            <div class="face front" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
-            <div class="face back" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
-            <div class="face right" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
-            <div class="face left" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
-            <div class="face top" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
-            <div class="face bottom" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
-        </div>
+        <svg id="canvas" viewBox="-160 -160 320 320">
+            <g id="poly-group"></g>
+        </svg>
     </div>
+
     <div id="control-widget">
         <div class="widget-title" id="act-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
+
     <script>
-        const scene=document.getElementById('scene'), cube=document.getElementById('cube'), faces=document.querySelectorAll('.face'), widget=document.getElementById('control-widget'), wTitle=document.getElementById('act-name');
-        let drag=false, cX=-20, cY=20, rX=-20, rY=20, vX=0, vY=0, lX=0, lY=0, sel=null;
-        
-        scene.addEventListener('mousedown', (e)=>{ drag=true; vX=0; vY=0; lX=e.clientX; lY=e.clientY; });
-        window.addEventListener('mousemove', (e)=>{ if(!drag)return; const dX=e.clientX-lX, dY=e.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.clientX; lY=e.clientY; });
-        window.addEventListener('mouseup', ()=>{ drag=false; });
-        scene.addEventListener('touchstart', (e)=>{ drag=true; vX=0; vY=0; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
-        window.addEventListener('touchmove', (e)=>{ if(!drag)return; const dX=e.touches.clientX-lX, dY=e.touches.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
-        window.addEventListener('touchend', ()=>{ drag=false; });
+        const canvas = document.getElementById('poly-group'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('act-name');
+        let drag = false, rX = -20, rY = 20, cX = -20, cY = 20, vX = 0, vY = 0, lX = 0, lY = 0, selIdx = null;
+
+        // Base de données des 6 couples de clivages pour vêtir les 12 faces du solide
+        const clivages = [
+            { name: "GLOBALISME", opp: 1, score: 0, locked: false }, { name: "SOUVERAINISME", opp: 0, score: 0, locked: false },
+            { name: "ÉGALITARISME", opp: 3, score: 0, locked: false }, { name: "MÉRITOCRATIE", opp: 2, score: 0, locked: false },
+            { name: "TECHNOCRATIE", opp: 5, score: 0, locked: false }, { name: "POPULISME", opp: 4, score: 0, locked: false },
+            { name: "FÉMINISME", opp: 7, score: 0, locked: false }, { name: "PATRIARCAT", opp: 6, score: 0, locked: false },
+            { name: "ESSENTIALISME", opp: 9, score: 0, locked: false }, { name: "CONSTRUCTIVISME", opp: 8, score: 0, locked: false },
+            { name: "ROYALISME", opp: 11, score: 0, locked: false }, { name: "RÉPUBLICANISME", opp: 10, score: 0, locked: false }
+        ];
+
+        // Mathématiques tridimensionnelles du Dodécaèdre Rhombique (14 sommets réels)
+        const d = 100, h = d / Math.sqrt(2);
+        const sommets = [
+            [0,0,d], [0,0,-d], [d,0,0], [-d,0,0], [0,d,0], [0,-d,0],
+            [h,h,h], [h,h,-h], [h,-h,h], [h,-h,-h], [-h,h,h], [-h,h,-h], [-h,-h,h], [-h,-h,-h]
+        ];
+
+        // Définition géométrique des 12 losanges par l'index de leurs sommets
+        const facesIndex = [, [1,9,2,7], [0,10,3,12], [1,13,3,11], [4,6,0,10], [5,12,0,8],
+, [5,9,1,13], [2,6,4,7], [2,8,5,9], [3,11,4,10], [3,13,5,12]
+        ];
+
+        // Matrice de projection 3D vers 2D
+        function projeter(x, y, z) {
+            const radX = rX * Math.PI / 180, radY = rY * Math.PI / 180;
+            const cosX = Math.cos(radX), sinX = Math.sin(radX);
+            const cosY = Math.cos(radY), sinY = Math.sin(radY);
+            const y1 = y * cosX - z * sinX;
+            const z1 = y * sinX + z * cosX;
+            const x2 = x * cosY + z1 * sinY;
+            return { x: x2, y: y1, z: z1 };
+        }
+
+        // Rendu permanent et gestion de la profondeur (Z-ordering)
+        function dessiner() {
+            canvas.innerHTML = '';
+            let listeFaces = [];
+
+            facesIndex.forEach((fIdx, index) => {
+                let pts = fIdx.map(i => projeter(...sommets[i]));
+                // Centre de gravité Z de la face pour calculer la visibilité
+                let zMoy = (pts[0].z + pts[1].z + pts[2].z + pts[3].z) / 4;
+                listeFaces.push({ index: index, pts: pts, zMoy: zMoy });
+            });
+
+            // Tri pour afficher les faces arrières en premier
+            listeFaces.sort((a, b) => a.zMoy - b.zMoy);
+
+            listeFaces.forEach(f => {
+                const data = clivages[f.index];
+                const poly = document.createElementNS("http://w3.org", "polygon");
+                let pStr = f.pts.map(p => `${p.x},${p.y}`).join(' ');
+                poly.setAttribute("points", pStr);
+                poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
+                
+                if(selIdx === f.index) poly.style.fill = "rgba(0,122,255,0.4)";
+                else if(data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
+
+                // Centre de la face pour positionner le texte au milieu du losange
+                let cx = (f.pts[0].x + f.pts[1].x + f.pts[2].x + f.pts[3].x) / 4;
+                let cy = (f.pts[0].y + f.pts[1].y + f.pts[2].y + f.pts[3].y) / 4;
+
+                const txt = document.createElementNS("http://w3.org", "text");
+                txt.setAttribute("x", cx); txt.setAttribute("y", cy);
+                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === f.index ? " active" : ""));
+                
+                let label = data.name;
+                if(data.locked) label += " : " + data.score;
+                else if(data.score > 0) label += " : +" + data.score;
+                txt.textContent = label;
+
+                poly.addEventListener('click', () => {
+                    if (data.locked) return;
+                    selIdx = f.index;
+                    widget.classList.add('visible');
+                    wTitle.innerText = data.name + " (+" + data.score + ")";
+                    dessiner();
+                });
+
+                canvas.appendChild(poly);
+                canvas.appendChild(txt);
+            });
+        }
+
+        // --- INTERACTION ROTATION SOURIS/TACTILE ---
+        document.getElementById('scene').addEventListener('mousedown', (e) => { drag = true; vX = 0; vY = 0; lX = e.clientX; lY = e.clientY; });
+        window.addEventListener('mousemove', (e) => { if (!drag) return; vY = (e.clientX - lX) * 0.4; vX = (e.clientY - lY) * 0.4; cY += vY; cX -= vX; lX = e.clientX; lY = e.clientY; });
+        window.addEventListener('mouseup', () => { drag = false; });
+        document.getElementById('scene').addEventListener('touchstart', (e) => { drag = true; vX = 0; vY = 0; lX = e.touches.clientX; lY = e.touches.clientY; }, { passive: true });
+        window.addEventListener('touchmove', (e) => { if (!drag) return; vY = (e.touches.clientX - lX) * 0.4; vX = (e.touches.clientY - lY) * 0.4; cY += vY; cX -= vX; lX = e.touches.clientX; lY = e.touches.clientY; }, { passive: true });
+        window.addEventListener('touchend', () => { drag = false; });
 
         function phys() {
-            if(!drag){ vX*=0.975; vY*=0.975; cY+=vY; cX-=vX; }
-            rX+=(cX-rX)*0.12; rY+=(cY-rY)*0.12;
-            cube.style.transform=`rotateX(${rX}deg) rotateY(${rY}deg)`;
+            if (!drag) { vX *= 0.975; vY *= 0.975; cY += vY; cX -= vX; }
+            rX += (cX - rX) * 0.12; rY += (cY - rY) * 0.12;
+            dessiner();
             requestAnimationFrame(phys);
         }
         phys();
 
-        function color(f) {
-            const s=parseInt(f.getAttribute('data-score')), n=f.getAttribute('data-name'), opp=document.getElementById(f.getAttribute('data-opp')), oName=opp.getAttribute('data-name');
-            if(s>0){
-                f.style.background=`rgba(0,122,255,${0.2+(s*0.07)})`; f.style.color=s>5?'#fff':'#1c1c1e'; f.style.borderColor='#0056b3'; f.innerText=n+" : +"+s; f.classList.remove('locked');
-                const scoreInverse = -(20 - s);
-                opp.classList.add('locked'); opp.innerText=oName+" : "+scoreInverse; opp.style.background=''; opp.style.color=''; opp.setAttribute('data-score','0');
-            }else{
-                f.style.background='rgba(255,255,255,0.9)'; f.style.color='#1c1c1e'; f.style.borderColor='#007aff'; f.innerText=n;
-                opp.classList.remove('locked'); opp.style.background='rgba(255,255,255,0.9)'; opp.style.color='#1c1c1e'; opp.style.borderColor='#007aff'; opp.innerText=oName;
-            }
-        }
-
-        faces.forEach(f => {
-            f.addEventListener('click', ()=>{
-                if(Math.abs(vX)>0.3 || Math.abs(vY)>0.3 || f.classList.contains('locked'))return;
-                if(sel && sel!==f && !sel.classList.contains('locked')) color(sel);
-                sel=f; if(parseInt(f.getAttribute('data-score'))===0) f.style.background='rgba(0,122,255,0.4)';
-                widget.classList.add('visible'); wTitle.innerText=f.getAttribute('data-name')+" (+"+f.getAttribute('data-score')+")";
-            });
-        });
-
-        window.addEventListener('wheel', (e)=>{
-            if(sel && !sel.classList.contains('locked')){
+        // --- GESTION DE LA MOLETTE ET REGLE DU MIROIR (-14) ---
+        window.addEventListener('wheel', (e) => {
+            if (selIdx !== null && !clivages[selIdx].locked) {
                 e.preventDefault();
-                let s=parseInt(sel.getAttribute('data-score'));
-                s = e.deltaY<0 ? Math.min(s+1,10) : Math.max(s-1,0);
-                sel.setAttribute('data-score', s); color(sel);
-                wTitle.innerText=sel.getAttribute('data-name')+" (+" + s + ")";
+                let s = clivages[selIdx].score;
+                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
+                clivages[selIdx].score = s;
+
+                const oppIdx = clivages[selIdx].opp;
+                if (s > 0) {
+                    clivages[oppIdx].score = -(20 - s);
+                    clivages[oppIdx].locked = true;
+                } else {
+                    clivages[oppIdx].score = 0;
+                    clivages[oppIdx].locked = false;
+                }
+                wTitle.innerText = clivages[selIdx].name + " (+" + s + ")";
+                dessiner();
             }
         }, { passive: false });
     </script>
