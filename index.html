@@ -2,154 +2,95 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outil Clivages - Cube Interactif</title>
+    <title>Agora-15 | Miroir Dynamique</title>
     <style>
-        /* Réinitialisation de la page */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #1e1e24;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-
-        /* Espace 3D pour le Cube */
-        .scene 3d {
-            width: 200px;
-            height: 200px;
-            perspective: 600px;
-        }
-
-        /* Le conteneur du Cube */
-        .cube {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            cursor: grab;
-            transition: transform 0.05s linear;
-        }
-
-        .cube:active {
-            cursor: grabbing;
-        }
-
-        /* Propriétés communes de chaque Face du Cube */
-        .face {
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            border: 2px solid #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            opacity: 0.85;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Définition de la position spatiale et de la couleur des faces */
-        .face.devant  { background: #e63946; transform: rotateY(  0deg) translateZ(100px); }
-        .face.derriere{ background: #f1faee; color: #1e1e24; transform: rotateY(180deg) translateZ(100px); }
-        .face.droite  { background: #a8dadc; color: #1e1e24; transform: rotateY( 90deg) translateZ(100px); }
-        .face.gauche  { background: #457b9d; transform: rotateY(-90deg) translateZ(100px); }
-        .face.haut    { background: #1d3557; transform: rotateX( 90deg) translateZ(100px); }
-        .face.bas     { background: #ffb703; color: #1e1e24; transform: rotateX(-90deg) translateZ(100px); }
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
+        h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
+        p { position:absolute; top:80px; color:#8e8e93; font-size:14px; text-align:center; }
+        .scene { width:220px; height:220px; perspective:600px; margin-top:20px; cursor:grab; }
+        .scene:active { cursor:grabbing; }
+        .cube { width:100%; height:100%; position:relative; transform-style:preserve-3d; transform:rotateX(-20deg) rotateY(20deg); }
+        .face { position:absolute; width:220px; height:220px; border:2px solid #007aff; background:rgba(255,255,255,0.9); color:#1c1c1e; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; text-align:center; box-sizing:border-box; padding:10px; backface-visibility:visible; cursor:pointer; transition:all 0.2s; }
+        .face.locked { background:rgba(142,142,147,0.18)!important; color:#4a4a4a!important; border-color:#8e8e93!important; cursor:not-allowed!important; font-weight:500; }
+        .front  { transform:rotateY(0deg) translateZ(110px); }
+        .back   { transform:rotateY(180deg) translateZ(110px); }
+        .right  { transform:rotateY(90deg) translateZ(110px); }
+        .left   { transform:rotateY(-90deg) translateZ(110px); }
+        .top    { transform:rotateX(90deg) translateZ(110px); }
+        .bottom { transform:rotateX(-90deg) translateZ(110px); }
+        #control-widget { position:absolute; bottom:40px; background:rgba(255,255,255,0.95); border:1px solid #e5e5ea; padding:15px 45px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,0.05); text-align:center; min-width:280px; opacity:0; transform:translateY(20px); transition:all 0.4s; pointer-events:none; }
+        #control-widget.visible { opacity:1; transform:translateY(0); }
+        .widget-title { font-size:16px; font-weight:600; color:#1c1c1e; margin-bottom:4px; }
+        .scroll-instruction { font-size:12px; color:#007aff; font-weight:500; }
     </style>
 </head>
 <body>
-
-    <h1>Outil Clivages</h1>
-
-    <!-- Structure du Cube 3D -->
-    <div class="scene3d">
-        <div id="monCube" class="cube">
-            <div class="face devant">Devant</div>
-            <div class="face derriere">Derrière</div>
-            <div class="face droite">Droite</div>
-            <div class="face gauche">Gauche</div>
-            <div class="face haut">Haut</div>
-            <div class="face bas">Bas</div>
+    <h1>Agora-15</h1>
+    <p>Étape 6.2 : Renseignez un clivage. Son opposé calcule sa force inverse en direct.</p>
+    <div class="scene" id="scene">
+        <div class="cube" id="cube">
+            <div class="face front" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="face back" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+            <div class="face right" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="face left" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+            <div class="face top" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="face bottom" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
         </div>
     </div>
-
+    <div id="control-widget">
+        <div class="widget-title" id="act-name">Clivage</div>
+        <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
+    </div>
     <script>
-        // Récupération de l'élément HTML du cube
-        const cube = document.getElementById('monCube');
+        const scene=document.getElementById('scene'), cube=document.getElementById('cube'), faces=document.querySelectorAll('.face'), widget=document.getElementById('control-widget'), wTitle=document.getElementById('act-name');
+        let drag=false, cX=-20, cY=20, rX=-20, rY=20, vX=0, vY=0, lX=0, lY=0, sel=null;
+        
+        scene.addEventListener('mousedown', (e)=>{ drag=true; vX=0; vY=0; lX=e.clientX; lY=e.clientY; });
+        window.addEventListener('mousemove', (e)=>{ if(!drag)return; const dX=e.clientX-lX, dY=e.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.clientX; lY=e.clientY; });
+        window.addEventListener('mouseup', ()=>{ drag=false; });
+        scene.addEventListener('touchstart', (e)=>{ drag=true; vX=0; vY=0; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
+        window.addEventListener('touchmove', (e)=>{ if(!drag)return; const dX=e.touches.clientX-lX, dY=e.touches.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
+        window.addEventListener('touchend', ()=>{ drag=false; });
 
-        // Variables pour mémoriser l'état des angles
-        let angleX = -20; // Inclinaison de départ (pour un effet de relief)
-        let angleY = 35;
-        const sensibilite = 0.4;
+        function phys() {
+            if(!drag){ vX*=0.975; vY*=0.975; cY+=vY; cX-=vX; }
+            rX+=(cX-rX)*0.12; rY+=(cY-rY)*0.12;
+            cube.style.transform=`rotateX(${rX}deg) rotateY(${rY}deg)`;
+            requestAnimationFrame(phys);
+        }
+        phys();
 
-        let enMouvement = false;
-        let dernierX = 0;
-        let dernierY = 0;
-
-        // Application de la position de départ au chargement
-        cube.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
-
-        // --- GESTION DES APPUIS (Souris et Tactile) ---
-        window.addEventListener('pointerdown', (e) => {
-            enMouvement = true;
-            dernierX = e.clientX;
-            dernierY = e.clientY;
-        });
-
-        // --- ARRÊT DU MOUVEMENT ---
-        window.addEventListener('pointerup', () => enMouvement = false);
-        window.addEventListener('pointercancel', () => enMouvement = false);
-
-        // --- LOGIQUE DE ROTATION UNIQUE ---
-        window.addEventListener('pointermove', (e) => {
-            if (!enMouvement) return;
-
-            // Calcul du delta de déplacement de l'utilisateur
-            let deltaX = e.clientX - dernierX;
-            let deltaY = e.clientY - dernierY;
-
-            dernierX = e.clientX;
-            dernierY = e.clientY;
-
-            // --- CORRECTIF DE LA TÊTE EN BAS ---
-            // On calcule le cosinus de l'inclinaison verticale (X) convertie en radians.
-            // Si le résultat est inférieur à 0, le cube est incliné à plus de 90° (tête en bas).
-            const radiansX = (angleX * Math.PI) / 180;
-            const estALenvers = Math.cos(radiansX) < 0;
-
-            if (estALenvers) {
-                // Inversion magique : le mouvement horizontal utilisateur correspond 
-                // de nouveau à la logique visuelle naturelle à l'écran.
-                deltaX = -deltaX;
+        function color(f) {
+            const s=parseInt(f.getAttribute('data-score')), n=f.getAttribute('data-name'), opp=document.getElementById(f.getAttribute('data-opp')), oName=opp.getAttribute('data-name');
+            if(s>0){
+                f.style.background=`rgba(0,122,255,${0.2+(s*0.07)})`; f.style.color=s>5?'#fff':'#1c1c1e'; f.style.borderColor='#0056b3'; f.innerText=n+" : +"+s; f.classList.remove('locked');
+                const scoreInverse = -(20 - s);
+                opp.classList.add('locked'); opp.innerText=oName+" : "+scoreInverse; opp.style.background=''; opp.style.color=''; opp.setAttribute('data-score','0');
+            }else{
+                f.style.background='rgba(255,255,255,0.9)'; f.style.color='#1c1c1e'; f.style.borderColor='#007aff'; f.innerText=n;
+                opp.classList.remove('locked'); opp.style.background='rgba(255,255,255,0.9)'; opp.style.color='#1c1c1e'; opp.style.borderColor='#007aff'; opp.innerText=oName;
             }
+        }
 
-            // Cumul et application des déplacements multipliés par la sensibilité
-            angleY += deltaX * sensibilite;
-            angleX -= deltaY * sensibilite; // Soustraction pour lever le cube en glissant vers le haut
-
-            // Reste dans une plage propre (0-360 degrés)
-            angleX = angleX % 360;
-            angleY = angleY % 360;
-
-            // Rendu de la transformation CSS
-            cube.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        faces.forEach(f => {
+            f.addEventListener('click', ()=>{
+                if(Math.abs(vX)>0.3 || Math.abs(vY)>0.3 || f.classList.contains('locked'))return;
+                if(sel && sel!==f && !sel.classList.contains('locked')) color(sel);
+                sel=f; if(parseInt(f.getAttribute('data-score'))===0) f.style.background='rgba(0,122,255,0.4)';
+                widget.classList.add('visible'); wTitle.innerText=f.getAttribute('data-name')+" (+"+f.getAttribute('data-score')+")";
+            });
         });
+
+        // Correction majeure : Ajout de e.preventDefault() et de { passive: false } pour libérer la molette
+        window.addEventListener('wheel', (e)=>{
+            if(sel && !sel.classList.contains('locked')){
+                e.preventDefault();
+                let s=parseInt(sel.getAttribute('data-score'));
+                s = e.deltaY<0 ? Math.min(s+1,10) : Math.max(s-1,0);
+                sel.setAttribute('data-score', s); color(sel);
+                wTitle.innerText=sel.getAttribute('data-name')+" (+" + s + ")";
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
