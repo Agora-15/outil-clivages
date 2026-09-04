@@ -2,24 +2,25 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Modèle Stable</title>
+    <title>Agora-15</title>
     <style>
         body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%;
             background-color: #ffffff;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden;
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            font-family: sans-serif; overflow: hidden;
             user-select: none;
         }
         h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
-        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
-        .scene { width: 220px; height: 220px; perspective: 800px; perspective-origin: 50% 50%; margin-top: 20px; cursor: grab; }
+        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; }
+        .scene { width: 220px; height: 220px; perspective: 600px; margin-top: 20px; cursor: grab; }
         .scene:active { cursor: grabbing; }
         .cube {
             width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
             transform: rotateX(-20deg) rotateY(20deg);
-            transform-origin: 50% 50% 0px;
         }
         .face {
             position: absolute; width: 220px; height: 220px;
@@ -30,14 +31,13 @@
             font-size: 16px; font-weight: 600; text-align: center;
             box-sizing: border-box; padding: 10px;
             backface-visibility: visible; cursor: pointer;
-            transition: all 0.2s ease; transform-origin: 50% 50% 0px;
+            transition: all 0.2s ease;
         }
         .face.locked {
             background: rgba(142, 142, 147, 0.18) !important;
             color: #4a4a4a !important;
             border-color: #8e8e93 !important;
             cursor: not-allowed !important;
-            font-weight: 500;
         }
         .front  { transform: rotateY(  0deg) translateZ(110px); }
         .back   { transform: rotateY(180deg) translateZ(110px); }
@@ -52,17 +52,17 @@
             border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             text-align: center; min-width: 280px;
             opacity: 0; transform: translateY(20px);
-            transition: all 0.4s; pointer-events: none;
+            transition: all 0.4s ease; pointer-events: none;
         }
         #control-widget.visible { opacity: 1; transform: translateY(0); }
-        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
-        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
+        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; }
+        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; margin-top: 4px; }
     </style>
 </head>
 <body>
 
     <h1>Agora-15</h1>
-    <p>Cliquez pour sélectionner. Utilisez la molette pour ajuster. Glissez pour tourner.</p>
+    <p>Version fluide originale rétablie.</p>
 
     <div class="scene" id="scene">
         <div class="cube" id="cube">
@@ -88,81 +88,82 @@
         const wTitle = document.getElementById('act-name');
 
         let drag = false;
-        let cibleX = -20, cibleY = 20;
-        let rotationX = -20, rotationY = 20;
-        let vitesseX = 0, vitesseY = 0;
-        let dernierX = 0, dernierY = 0;
+        let cX = -20, cY = 20;
+        let rX = -20, rY = 20;
+        let vX = 0, vY = 0;
+        let lX = 0, lY = 0;
         const friction = 0.975;
         const sensibilite = 0.35;
         let sel = null;
 
-        function obtenirDirectionAxeY() {
-            const radX = rotationX * Math.PI / 180;
-            const radY = rotationY * Math.PI / 180;
-            return (Math.cos(radX) * Math.cos(radY)) >= 0 ? 1 : -1;
-        }
+        scene.addEventListener('mousedown', (e) => {
+            drag = true; vX = 0; vY = 0;
+            lX = e.clientX; lY = e.clientY;
+        });
 
-        function CommencerGlisser(e) {
-            drag = true; vitesseX = 0; vitesseY = 0;
-            dernierX = e.clientX || (e.touches && e.touches[0].clientX);
-            dernierY = e.clientY || (e.touches && e.touches[0].clientY);
-        }
-
-        function Glisser(e) {
+        window.addEventListener('mousemove', (e) => {
             if (!drag) return;
-            const x = e.clientX || (e.touches && e.touches[0].clientX);
-            const y = e.clientY || (e.touches && e.touches[0].clientY);
-            const dX = x - dernierX;
-            const dY = y - dernierY;
-            const dirY = obtenirDirectionAxeY();
-            vitesseY = dX * sensibilite * dirY;
-            vitesseX = dY * sensibilite;
-            cibleY += vitesseY;
-            cibleX -= vitesseX;
-            dernierX = x; dernierY = y;
-        }
+            vY = (e.clientX - lX) * sensibilite;
+            vX = (e.clientY - lY) * sensibilite;
+            cY += vY; cX -= vX;
+            lX = e.clientX; lY = e.clientY;
+        });
 
-        function ArreterGlisser() { drag = false; }
+        window.addEventListener('mouseup', () => { drag = false; });
 
-        scene.addEventListener('mousedown', CommencerGlisser);
-        window.addEventListener('mousemove', Glisser);
-        window.addEventListener('mouseup', ArreterGlisser);
-        scene.addEventListener('touchstart', CommencerGlisser, { passive: true });
-        window.addEventListener('touchmove', Glisser, { passive: true });
-        window.addEventListener('touchend', ArreterGlisser);
+        scene.addEventListener('touchstart', (e) => {
+            drag = true; vX = 0; vY = 0;
+            lX = e.touches[0].clientX;
+            lY = e.touches[0].clientY;
+        }, { passive: true });
 
-        function bouclePhysique() {
+        window.addEventListener('touchmove', (e) => {
+            if (!drag) return;
+            vY = (e.touches[0].clientX - lX) * sensibilite;
+            vX = (e.touches[0].clientY - lY) * sensibilite;
+            cY += vY; cX -= vX;
+            lX = e.touches[0].clientX;
+            lY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => { drag = false; });
+
+        function phys() {
             if (!drag) {
-                vitesseX *= friction; vitesseY *= friction;
-                cibleY += vitesseY; cibleX -= vitesseX;
+                vX *= friction; vY *= friction;
+                cY += vY; cX -= vX;
             }
-            rotationX += (cibleX - rotationX) * 0.12;
-            rotationY += (cibleY - rotationY) * 0.12;
-            cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-            requestAnimationFrame(bouclePhysique);
+            rX += (cX - rX) * 0.12;
+            rY += (cY - rY) * 0.12;
+            cube.style.transform = `rotateX(${rX}deg) rotateY(${rY}deg)`;
+            requestAnimationFrame(phys);
         }
-        bouclePhysique();
+        phys();
 
         function color(f) {
             const s = parseInt(f.getAttribute('data-score'));
             const n = f.getAttribute('data-name');
             const opp = document.getElementById(f.getAttribute('data-opp'));
             const oName = opp.getAttribute('data-name');
+            
             if (s > 0) {
                 f.style.background = `rgba(0,122,255,${0.2+(s*0.07)})`;
                 f.style.color = s > 5 ? '#fff' : '#1c1c1e';
                 f.style.borderColor = '#0056b3';
                 f.innerText = n + " : +" + s;
                 f.classList.remove('locked');
+                
                 const scoreInverse = -(20 - s);
                 opp.classList.add('locked');
                 opp.innerText = oName + " : " + scoreInverse;
-                opp.style.background = ''; opp.style.color = '';
+                opp.style.background = ''; 
+                opp.style.color = '';
             } else {
                 f.style.background = 'rgba(255,255,255,0.9)';
                 f.style.color = '#1c1c1e';
                 f.style.borderColor = '#007aff';
                 f.innerText = n;
+                
                 opp.classList.remove('locked');
                 opp.style.background = 'rgba(255,255,255,0.9)';
                 opp.style.color = '#1c1c1e';
@@ -173,10 +174,14 @@
 
         faces.forEach(f => {
             f.addEventListener('click', () => {
-                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3 || f.classList.contains('locked')) return;
-                if (sel && sel !== f && !sel.classList.contains('locked')) color(sel);
+                if (Math.abs(vX) > 0.3 || Math.abs(vY) > 0.3 || f.classList.contains('locked')) return;
+                if (sel && sel !== f && !sel.classList.contains('locked')) {
+                    color(sel);
+                }
                 sel = f;
-                if (parseInt(f.getAttribute('data-score')) === 0) f.style.background = 'rgba(0, 122, 255, 0.4)';
+                if (parseInt(f.getAttribute('data-score')) === 0) {
+                    f.style.background = 'rgba(0, 122, 255, 0.4)';
+                }
                 widget.classList.add('visible');
                 wTitle.innerText = f.getAttribute('data-name') + " (+" + f.getAttribute('data-score') + ")";
             });
@@ -187,6 +192,7 @@
                 e.preventDefault();
                 let s = parseInt(sel.getAttribute('data-score'));
                 s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
+                
                 sel.setAttribute('data-score', s);
                 color(sel);
                 wTitle.innerText = sel.getAttribute('data-name') + " (+" + s + ")";
