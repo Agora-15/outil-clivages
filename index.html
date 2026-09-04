@@ -12,7 +12,7 @@
         svg { width:100%; height:100%; }
         .face-node { fill:rgba(255,255,255,0.9); stroke:#007aff; stroke-width:1.5; cursor:pointer; transition:all 0.2s; }
         .face-node:hover { fill:rgba(0,122,255,0.08); stroke-width:2.5; }
-        .face-node.locked { fill:rgba(142,142,147,0.18)!important; stroke:#8e8e93!important; cursor:not-allowed!important; }
+        .face-node.locked { fill:rgba(142,142,147,0.18)!important; stroke:#8e8e93!important; cursor:not-allowed!important; font-weight:500; }
         .face-text { font-size:7px; font-weight:bold; fill:#1c1c1e; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
         .face-text.locked { fill:#4a4a4a!important; font-weight:500; }
         .face-text.active { fill:#ffffff!important; }
@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Modélisation Moléculaire : 30 disques distincts (8 verticaux stricts, 22 répartis au Nombre d'Or).</p>
+    <p>Modélisation : Ceinture de 10 cercles verticaux (2 niveaux de 5 alternés) et 0 pôle horizontal.</p>
     <div class="scene" id="scene">
         <svg viewBox="-170 -160 340 340"><g id="poly-group"></g></svg>
     </div>
@@ -50,25 +50,25 @@
             { name: "CAPITALISME", opp: 21, score: 0, locked: false }, { name: "SOCIALISME", opp: 20, score: 0, locked: false },
             { name: "TECHNOSOLUTIONNISME", opp: 23, score: 0, locked: false }, { name: "RADICALITÉ ÉCOLOGIQUE", opp: 22, score: 0, locked: false },
             { name: "ÉCOCENTRISME", opp: 25, score: 0, locked: false }, { name: "ANTHROPOCENTRISME", opp: 24, score: 0, locked: false },
-            { name: "OUVERTURE", opp: 27, score: 0, locked: false }, { name: "FERMETURE", opp: 26, score: 0, locked: false },
+            { name: "OUVERTURE", opp: 27, score: 0, locked: false }, { name: "FERMETURE", EXP: 26, score: 0, locked: false },
             { name: "SCIENTISME", opp: 29, score: 0, locked: false }, { name: "RELATIVISME SCIENTIFIQUE", opp: 28, score: 0, locked: false }
         ];
 
-        // 30 Vecteurs de directions exacts du Triacontaèdre Rhombique (Rayon = 120px)
-        // Intègre parfaitement vos 8 faces de la couronne équatoriale stricts à Y=0.
         const g = 1.618, R = 120;
         const directions = [
+            // Les 20 directions d'or d'origine de votre socle fonctionnel
             { x: R, y: 0, z: R/g }, { x: -R, y: 0, z: -R/g }, { x: R/g, y: R, z: 0 }, { x: -R/g, y: -R, z: 0 },
             { x: 0, y: R/g, z: R }, { x: 0, y: -R/g, z: -R }, { x: R, y: 0, z: -R/g }, { x: -R, y: 0, z: R/g },
             { x: R/g, y: -R, z: 0 }, { x: -R/g, y: R, z: 0 }, { x: 0, y: R/g, z: -R }, { x: 0, y: -R/g, z: R },
             { x: R/g, y: R/g, z: R/g }, { x: -R/g, y: -R/g, z: -R/g }, { x: R/g, y: R/g, z: -R/g }, { x: -R/g, y: -R/g, z: R/g },
             { x: R/g, y: -R/g, z: R/g }, { x: -R/g, y: R/g, z: -R/g }, { x: R/g, y: -R/g, z: -R/g }, { x: -R/g, y: R/g, z: R/g },
-            // Les 8 axes verticaux stricts (Projections équatoriales pures)
-            { x: 0, y: R, z: 0 }, { x: 0, y: -R, z: 0 },
-            { x: R*Math.cos(0), y: 0, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: 0, z: R*Math.sin(Math.PI) },
-            { x: R*Math.cos(Math.PI/4), y: 0, z: R*Math.sin(Math.PI/4) }, { x: R*Math.cos(-3*Math.PI/4), y: 0, z: R*Math.sin(-3*Math.PI/4) },
-            { x: R*Math.cos(-Math.PI/4), y: 0, z: R*Math.sin(-Math.PI/4) }, { x: R*Math.cos(3*Math.PI/4), y: 0, z: R*Math.sin(3*Math.PI/4) },
-            { x: R*Math.cos(Math.PI/2), y: 0, z: R*Math.sin(Math.PI/2) }, { x: R*Math.cos(-Math.PI/2), y: 0, z: R*Math.sin(-Math.PI/2) }
+            
+            // Les 10 directions de la ceinture équatoriale réajustée (2 niveaux alternés de 5), 0 pôle vertical pur
+            { x: R*Math.cos(0), y: 15, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: -15, z: R*Math.sin(Math.PI) },
+            { x: R*Math.cos(72*Math.PI/180), y: 15, z: R*Math.sin(72*Math.PI/180) }, { x: R*Math.cos(-108*Math.PI/180), y: -15, z: R*Math.sin(-108*Math.PI/180) },
+            { x: R*Math.cos(144*Math.PI/180), y: 15, z: R*Math.sin(144*Math.PI/180) }, { x: R*Math.cos(-36*Math.PI/180), y: -15, z: R*Math.sin(-36*Math.PI/180) },
+            { x: R*Math.cos(-144*Math.PI/180), y: 15, z: R*Math.sin(-144*Math.PI/180) }, { x: R*Math.cos(36*Math.PI/180), y: -15, z: R*Math.sin(36*Math.PI/180) },
+            { x: R*Math.cos(-72*Math.PI/180), y: 15, z: R*Math.sin(-72*Math.PI/180) }, { x: R*Math.cos(108*Math.PI/180), y: -15, z: R*Math.sin(108*Math.PI/180) }
         ];
 
         function projeter(pt) {
@@ -82,50 +82,26 @@
         }
 
         function dessiner() {
-            canvas.innerHTML = '';
-            let listeDisques = [];
-
-            directions.forEach((dir, index) => {
-                let p = projeter(dir);
-                listeDisques.push({ index: index, x: p.x, y: p.y, z: p.z });
-            });
-
-            // Tri par profondeur pour gérer la transparence et les chevauchements
+            canvas.innerHTML = ''; let listeDisques = [];
+            directions.forEach((dir, index) => { let p = projeter(dir); listeDisques.push({ index: index, x: p.x, y: p.y, z: p.z }); });
             listeDisques.sort((a, b) => a.z - b.z);
-
             listeDisques.forEach(d => {
                 const data = clivages[d.index];
-                
-                // Dessin du disque miniature (diamètre 42px à l'écran pour garder l'effet filaire fin)
                 const circle = document.createElementNS("http://w3.org", "circle");
-                circle.setAttribute("cx", d.x); circle.setAttribute("cy", d.y);
-                circle.setAttribute("r", "21");
+                circle.setAttribute("cx", d.x); circle.setAttribute("cy", d.y); circle.setAttribute("r", "21");
                 circle.setAttribute("class", "face-node" + (data.locked ? " locked" : ""));
-                
                 if (selIdx === d.index) circle.style.fill = "rgba(0,122,255,0.4)";
                 else if (data.score > 0) circle.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
-
-                // Texte centré de façon rigoureuse à l'intérieur du cercle vectoriel
+                
                 const txt = document.createElementNS("http://w3.org", "text");
                 txt.setAttribute("x", d.x); txt.setAttribute("y", d.y);
                 txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === d.index ? " active" : ""));
-                
-                // Formatage très court du label pour qu'il tienne dans le petit cercle
                 let lbl = data.name.substring(0, 8) + ".";
-                if (data.locked) lbl = "Locked";
-                else if (data.score > 0) lbl = "+" + data.score;
+                if (data.locked) lbl = "Locked"; else if (data.score > 0) lbl = "+" + data.score;
                 txt.textContent = lbl;
-
-                circle.addEventListener('click', () => {
-                    if (data.locked) return;
-                    selIdx = d.index;
-                    widget.classList.add('visible');
-                    wTitle.textContent = data.name + " (+" + data.score + ")";
-                    dessiner();
-                });
-
-                canvas.appendChild(circle);
-                canvas.appendChild(txt);
+                
+                circle.addEventListener('click', () => { if (data.locked) return; selIdx = d.index; widget.classList.add('visible'); wTitle.textContent = data.name + " (+" + data.score + ")"; dessiner(); });
+                canvas.appendChild(circle); canvas.appendChild(txt);
             });
         }
 
@@ -135,29 +111,18 @@
 
         function phys() {
             if (!drag) { vX *= 0.975; vY *= 0.975; cY += vY; cX -= vX; }
-            rX += (cX - rX) * 0.12; rY += (cY - rY) * 0.12;
-            dessiner();
-            requestAnimationFrame(phys);
+            rX += (cX - rX) * 0.12; rY += (cY - rY) * 0.12; dessiner(); requestAnimationFrame(phys);
         }
         phys();
 
         window.addEventListener('wheel', (e) => {
             if (selIdx !== null && !clivages[selIdx].locked) {
-                e.preventDefault();
-                let s = clivages[selIdx].score;
-                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
-                clivages[selIdx].score = s;
-
+                e.preventDefault(); let s = clivages[selIdx].score;
+                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0); clivages[selIdx].score = s;
                 const oppIdx = clivages[selIdx].opp;
-                if (s > 0) {
-                    clivages[oppIdx].score = -(20 - s);
-                    clivages[oppIdx].locked = true;
-                } else {
-                    clivages[oppIdx].score = 0;
-                    clivages[oppIdx].locked = false;
-                }
-                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")";
-                dessiner();
+                if (s > 0) { clivages[oppIdx].score = -(20 - s); clivages[oppIdx].locked = true; } 
+                else { clivages[oppIdx].score = 0; clivages[oppIdx].locked = false; }
+                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")"; dessiner();
             }
         }, { passive: false });
     </script>
