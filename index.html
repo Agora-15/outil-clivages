@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | 30 Faces Stables</title>
+    <title>Agora-15 | Géométrie Rhombique</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Modélisation Moléculaire : 30 disques distincts (8 verticaux stricts, 22 répartis au Nombre d'Or).</p>
+    <p>Triacontaèdre moléculaire : 30 disques répartis en 6 couronnes alternées de 5 (sans pôle).</p>
     <div class="scene" id="scene">
         <svg viewBox="-170 -160 340 340"><g id="poly-group"></g></svg>
     </div>
@@ -54,22 +54,27 @@
             { name: "SCIENTISME", opp: 29, score: 0, locked: false }, { name: "RELATIVISME SCIENTIFIQUE", opp: 28, score: 0, locked: false }
         ];
 
-        // 30 Vecteurs de directions exacts du Triacontaèdre Rhombique (Rayon = 120px)
-        // Intègre parfaitement vos 8 faces de la couronne équatoriale stricts à Y=0.
-        const g = 1.618, R = 120;
-        const directions = [
-            { x: R, y: 0, z: R/g }, { x: -R, y: 0, z: -R/g }, { x: R/g, y: R, z: 0 }, { x: -R/g, y: -R, z: 0 },
-            { x: 0, y: R/g, z: R }, { x: 0, y: -R/g, z: -R }, { x: R, y: 0, z: -R/g }, { x: -R, y: 0, z: R/g },
-            { x: R/g, y: -R, z: 0 }, { x: -R/g, y: R, z: 0 }, { x: 0, y: R/g, z: -R }, { x: 0, y: -R/g, z: R },
-            { x: R/g, y: R/g, z: R/g }, { x: -R/g, y: -R/g, z: -R/g }, { x: R/g, y: R/g, z: -R/g }, { x: -R/g, y: -R/g, z: R/g },
-            { x: R/g, y: -R/g, z: R/g }, { x: -R/g, y: R/g, z: -R/g }, { x: R/g, y: -R/g, z: -R/g }, { x: -R/g, y: R/g, z: R/g },
-            // Les 8 axes verticaux stricts (Projections équatoriales pures)
-            { x: 0, y: R, z: 0 }, { x: 0, y: -R, z: 0 },
-            { x: R*Math.cos(0), y: 0, z: R*Math.sin(0) }, { x: R*Math.cos(Math.PI), y: 0, z: R*Math.sin(Math.PI) },
-            { x: R*Math.cos(Math.PI/4), y: 0, z: R*Math.sin(Math.PI/4) }, { x: R*Math.cos(-3*Math.PI/4), y: 0, z: R*Math.sin(-3*Math.PI/4) },
-            { x: R*Math.cos(-Math.PI/4), y: 0, z: R*Math.sin(-Math.PI/4) }, { x: R*Math.cos(3*Math.PI/4), y: 0, z: R*Math.sin(3*Math.PI/4) },
-            { x: R*Math.cos(Math.PI/2), y: 0, z: R*Math.sin(Math.PI/2) }, { x: R*Math.cos(-Math.PI/2), y: 0, z: R*Math.sin(-Math.PI/2) }
-        ];
+        // Génération rigoureuse des 30 vecteurs du Triacontaèdre par couronnes de 5 (Rayon = 120px)
+        const directions = [];
+        const R = 120;
+        
+        // Les 6 couronnes de 5 niveaux induites par le Nombre d'Or
+        const latitudes = [79.19, 52.62, 18.0, -18.0, -52.62, -79.19];
+        
+        latitudes.forEach((lat, cIdx) => {
+            const phi = lat * Math.PI / 180;
+            // Alternance de 36° entre chaque niveau pour imbriquer les losanges en quinconce
+            const offset = (cIdx % 2) * (36 * Math.PI / 180); 
+            
+            for (let i = 0; i < 5; i++) {
+                const theta = (i * 72 * Math.PI / 180) + offset;
+                directions.push({
+                    x: R * Math.cos(phi) * Math.cos(theta),
+                    y: R * Math.sin(phi),
+                    z: R * Math.cos(phi) * Math.sin(theta)
+                });
+            }
+        });
 
         function projeter(pt) {
             const radX = rX * Math.PI / 180, radY = rY * Math.PI / 180;
@@ -90,13 +95,10 @@
                 listeDisques.push({ index: index, x: p.x, y: p.y, z: p.z });
             });
 
-            // Tri par profondeur pour gérer la transparence et les chevauchements
             listeDisques.sort((a, b) => a.z - b.z);
 
             listeDisques.forEach(d => {
                 const data = clivages[d.index];
-                
-                // Dessin du disque miniature (diamètre 42px à l'écran pour garder l'effet filaire fin)
                 const circle = document.createElementNS("http://w3.org", "circle");
                 circle.setAttribute("cx", d.x); circle.setAttribute("cy", d.y);
                 circle.setAttribute("r", "21");
@@ -105,12 +107,10 @@
                 if (selIdx === d.index) circle.style.fill = "rgba(0,122,255,0.4)";
                 else if (data.score > 0) circle.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
 
-                // Texte centré de façon rigoureuse à l'intérieur du cercle vectoriel
                 const txt = document.createElementNS("http://w3.org", "text");
                 txt.setAttribute("x", d.x); txt.setAttribute("y", d.y);
                 txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === d.index ? " active" : ""));
                 
-                // Formatage très court du label pour qu'il tienne dans le petit cercle
                 let lbl = data.name.substring(0, 8) + ".";
                 if (data.locked) lbl = "Locked";
                 else if (data.score > 0) lbl = "+" + data.score;
