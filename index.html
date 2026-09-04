@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Modèle Moléculaire 12</title>
+    <title>Agora-15 | Couronne 8 Faces</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -44,8 +44,7 @@
             cursor: not-allowed !important;
         }
         
-        /* CORRECTIONS STRICTES DES AXES DU DODÉCAÈDRE (12 FACES AU TOTAL) */
-        /* Les 8 Faces Verticales de la Couronne (Espacées rigoureusement de 45°) */
+        /* LES 8 FACES VERTICALES UNIQUES DE LA COURONNE (Angles stricts à 45°) */
         .fV0  { transform: rotateY(   0deg) translateZ(100px); }
         .fV1  { transform: rotateY( 180deg) translateZ(100px); }
         .fV2  { transform: rotateY(  90deg) translateZ(100px); }
@@ -54,14 +53,6 @@
         .fV5  { transform: rotateY(-135deg) translateZ(100px); }
         .fV6  { transform: rotateY( -45deg) translateZ(100px); }
         .fV7  { transform: rotateY( 135deg) translateZ(100px); }
-        
-        /* Les 2 Faces Horizontales */
-        .fH0  { transform: rotateX(  90deg) translateZ(100px); }
-        .fH1  { transform: rotateX( -90deg) translateZ(100px); }
-        
-        /* Les 2 Axes Inclinés Restants */
-        .fA0  { transform: rotateX(  45deg) translateZ(100px); }
-        .fA1  { transform: rotateX(-135deg) translateZ(100px); }
 
         #control-widget {
             position: absolute; bottom: 40px;
@@ -78,11 +69,11 @@
 <body>
 
     <h1>Agora-15</h1>
-    <p>Structure corrigée : 8 disques verticaux, 2 horizontaux, 2 inclinés (12 options).</p>
+    <p>Couronne épurée : 8 disques verticaux uniques à 45° (4 duos d'opposés fondamentaux).</p>
 
     <div class="scene" id="scene">
         <div class="structure" id="structure">
-            <!-- Habillage exact des 12 faces avec vos 6 premiers duos fondamentaux -->
+            <!-- Habillage des 4 premiers duos cardinaux -->
             <div class="face fV0" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
             <div class="face fV1" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
             <div class="face fV2" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
@@ -91,12 +82,6 @@
             <div class="face fV5" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
             <div class="face fV6" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
             <div class="face fV7" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
-            
-            <div class="face fH0" id="face-8" data-opp="face-9" data-name="AUTORITARISME" data-score="0">AUTORITARISME</div>
-            <div class="face fH1" id="face-9" data-opp="face-8" data-name="LIBERTARIANISME" data-score="0">LIBERTARIANISME</div>
-            
-            <div class="face fA0" id="face-10" data-opp="face-11" data-name="PROGRESSISME" data-score="0">PROGRESSISME</div>
-            <div class="face fA1" id="face-11" data-opp="face-10" data-name="CONSERVATISME" data-score="0">CONSERVATISME</div>
         </div>
     </div>
     <div id="control-widget">
