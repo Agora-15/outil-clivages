@@ -77,8 +77,8 @@
             margin-top: 10px;
         }
     </style>
-    <!-- LIENS CORRIGÉS ET COMPLETS POUR LA 3D -->
-    <script src="https://cloudflare.com"></script>
+    <!-- UTILISATION DES LIENS DE SECOURS PLUS STABLES -->
+    <script src="https://jsdelivr.net"></script>
     <script src="https://jsdelivr.net"></script>
 </head>
 <body>
@@ -102,25 +102,30 @@
         scene.background = new THREE.Color(0xffffff);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.z = 8;
+        camera.position.set(0, 0, 8);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.enableZoom = true;
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        // Éclairage renforcé pour éviter l'effet "point noir"
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
-        dirLight.position.set(5, 10, 7);
-        scene.add(dirLight);
+        
+        const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight1.position.set(5, 10, 7);
+        scene.add(dirLight1);
 
-        // --- 2. LES 15 CLIVAGES DU TRIACONTAÈDRE ---
+        const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
+        dirLight2.position.set(-5, -5, -5);
+        scene.add(dirLight2);
+
+        // --- 2. LES 15 CLIVAGES ---
         const clivages = [
             "Républicanisme", "Royalisme", "Technocratie", "Populisme", 
             "Autoritarisme", "Libertarianisme", "Capitalisme", "Socialisme",
@@ -140,9 +145,9 @@
         // Génération des 30 zones interactives externes
         for (let i = 0; i < 30; i++) {
             const material = new THREE.MeshPhongMaterial({
-                color: 0xf2f2f7,
+                color: 0xe5e5ea,
                 transparent: true,
-                opacity: 0.25,
+                opacity: 0.4,
                 side: THREE.DoubleSide
             });
             
@@ -150,21 +155,19 @@
             const mesh = new THREE.Mesh(subGeom, material);
             mesh.userData = { id: i, name: clivages[i], score: 0 };
             solidGroup.add(mesh);
-            facesMesh.push(mesh);
 
             const wireframeGeom = new THREE.EdgesGeometry(subGeom);
-            const wireframeMat = new THREE.LineBasicMaterial({ color: 0xd1d1d6, linewidth: 1 });
+            const wireframeMat = new THREE.LineBasicMaterial({ color: 0x8e8e93, linewidth: 1 });
             const wireframe = new THREE.LineSegments(wireframeGeom, wireframeMat);
             solidGroup.add(wireframe);
         }
 
-        // --- 3. GESTION DES CLICS ET DE LA MOLETTE (CODE ENTIER ET FERMÉ) ---
+        // --- 3. GESTION DES CLICS ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         let selectedFace = null;
 
         window.addEventListener('click', (event) => {
-            // Ignorer le clic si on clique sur le widget d'intensité du bas
             if (event.clientY > window.innerHeight - 120 && event.clientX > window.innerWidth/2 - 150 && event.clientX < window.innerWidth/2 + 150) {
                 return;
             }
@@ -174,44 +177,43 @@
 
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(solidGroup.children);
-
             const validIntersects = intersects.filter(hit => hit.object.userData && hit.object.userData.name);
 
             if (validIntersects.length > 0) {
                 if(selectedFace) {
-                    selectedFace.material.color.setHex(0xf2f2f7);
+                    selectedFace.material.color.setHex(0xe5e5ea);
+                    selectedFace.material.opacity = 0.4;
                 }
                 
-                selectedFace = validIntersects[0].object;
+                selectedFace = validIntersects[0].object; // Correction de l'index de sélection
                 selectedFace.material.color.setHex(0x007aff);
-                selectedFace.material.opacity = 0.5;
+                selectedFace.material.opacity = 0.7;
 
                 document.getElementById('control-widget').style.display = 'block';
-                document.getElementById('active-face-name').innerText = selectedFace.userData.name + " (Score : " + selectedFace.userData.score + ")";
+                document.getElementById('active-face-name').innerText = selectedFace.userData.name;
             }
         });
 
         window.addEventListener('wheel', (event) => {
             if (selectedFace) {
                 controls.enableZoom = false; 
-                
                 let change = event.deltaY < 0 ? 1 : -1;
                 selectedFace.userData.score = Math.min(Math.max(selectedFace.userData.score + change, 0), 10);
                 
-                selectedFace.material.opacity = 0.25 + (selectedFace.userData.score * 0.07);
+                selectedFace.material.opacity = 0.3 + (selectedFace.userData.score * 0.06);
                 document.getElementById('active-face-name').innerText = selectedFace.userData.name + " : +" + selectedFace.userData.score;
                 
                 setTimeout(() => { controls.enableZoom = true; }, 200);
             }
         });
 
-        // --- 4. BOUCLE DE RENDU ---
+        // --- 4. BOUCLE D'ANIMATION ---
         function animate() {
             requestAnimationFrame(animate);
             
             if (!selectedFace) {
-                solidGroup.rotation.y += 0.0015;
-                solidGroup.rotation.x += 0.0008;
+                solidGroup.rotation.y += 0.002;
+                solidGroup.rotation.x += 0.001;
             }
 
             controls.update();
