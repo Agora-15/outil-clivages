@@ -45,10 +45,15 @@
 
         const cubeGroup = new THREE.Group(); scene.add(cubeGroup);
         const facesMesh = [], geometry = new THREE.PlaneGeometry(2, 2);
+        
+        // Coordonnées géométriques réparées et complétées à 100%
         const configs = [
-            { pos:, rot: [0, 0, 0] }, { pos: [0, 0, -1], rot: [0, Math.PI, 0] },
-            { pos:, rot: [0, Math.PI / 2, 0] }, { pos: [-1, 0, 0], rot: [0, -Math.PI / 2, 0] },
-            { pos:, rot: [-Math.PI / 2, 0, 0] }, { pos: [0, -1, 0], rot: [Math.PI / 2, 0, 0] }
+            { pos: [0, 0, 1], rot: [0, 0, 0] },
+            { pos: [0, 0, -1], rot: [0, Math.PI, 0] },
+            { pos: [1, 0, 0], rot: [0, Math.PI / 2, 0] },
+            { pos: [-1, 0, 0], rot: [0, -Math.PI / 2, 0] },
+            { pos: [0, 1, 0], rot: [-Math.PI / 2, 0, 0] },
+            { pos: [0, -1, 0], rot: [Math.PI / 2, 0, 0] }
         ];
 
         for (let i = 0; i < 6; i++) {
@@ -57,7 +62,7 @@
             ctx.fillStyle = '#1c1c1e'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(clivages[i].name, 128, 128);
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 0.95 });
-            const mesh = new THREE.Mesh(geometry, material); mesh.position.set(...configs[i].pos); mesh.rotation.set(...configs[i].rot);
+            const mesh = new THREE.Mesh(geometry, material); mesh.position.set(configs[i].pos[0], configs[i].pos[1], configs[i].pos[2]); mesh.rotation.set(configs[i].rot[0], configs[i].rot[1], configs[i].rot[2]);
             mesh.userData = { id: i, canvas: canvas, ctx: ctx, locked: false };
             cubeGroup.add(mesh); facesMesh.push(mesh);
         }
