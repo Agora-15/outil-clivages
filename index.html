@@ -2,73 +2,44 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agora-15 | Modélisation 2 Faces</title>
+    <title>Agora-15 | Étape 2 Faces</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; overflow: hidden; user-select: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: sans-serif; overflow: hidden; user-select: none;
         }
-        header { text-align: center; position: absolute; top: 40px; }
-        h1 { font-size: 26px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin: 0; }
-        .sub { font-size: 14px; color: #8e8e93; margin-top: 5px; }
-        
-        /* Conteneur pour afficher le premier duo face à face */
-        .duo-container {
-            display: flex; gap: 30px; width: 90%; max-width: 500px;
-            justify-content: center; align-items: center; margin-top: 20px;
-        }
-        
-        /* Design des boîtes de clivages */
-        .bloc-face {
-            background: #ffffff; border: 2px solid #007aff;
-            color: #1c1c1e; border-radius: 16px;
-            width: 180px; height: 120px; display: flex; align-items: center;
-            justify-content: center; text-align: center;
-            font-size: 14px; font-weight: 600; padding: 15px;
-            box-sizing: border-box; cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.03);
-        }
-        .bloc-face:hover { background: rgba(0, 122, 255, 0.03); }
-        
-        /* Style des faces verrouillées en gris anthracite lisible */
-        .bloc-face.verrouille {
-            background: rgba(142, 142, 147, 0.18) !important;
-            color: #3a3a3a !important;
-            border-color: #8e8e93 !important;
-            cursor: not-allowed !important;
-            font-weight: 500;
-        }
-        
+        h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
+        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
+        .scene { width: 320px; height: 320px; margin-top: 20px; display: flex; align-items: center; justify-content: center; }
+        svg { width: 100%; height: 100%; }
+        .face { fill: rgba(255,255,255,0.9); stroke: #007aff; stroke-width: 2; cursor: pointer; transition: all 0.2s; }
+        .face:hover { fill: rgba(0,122,255,0.05); }
+        .face.locked { fill: rgba(142,142,147,0.18)!important; stroke: #8e8e93!important; cursor: not-allowed!important; }
+        .face-text { font-size: 10px; font-weight: bold; fill: #1c1c1e; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
+        .face-text.locked { fill: #4a4a4a!important; font-weight: 500; }
+        .face-text.active { fill: #ffffff!important; }
         #control-widget {
             position: absolute; bottom: 40px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #e5e5ea; padding: 15px 45px;
-            border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            text-align: center; min-width: 280px;
-            opacity: 0; transform: translateY(15px);
-            transition: all 0.4s ease; pointer-events: none;
+            background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea;
+            padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center; min-width: 280px; opacity: 0; transform: translateY(20px);
+            transition: all 0.4s; pointer-events: none;
         }
         #control-widget.visible { opacity: 1; transform: translateY(0); }
-        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; }
-        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; margin-top: 4px; }
+        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
+        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
     </style>
 </head>
 <body>
+    <h1>Agora-15</h1>
+    <p>Étape : Affichage de 2 faces géométriques opposées dans l'espace.</p>
 
-    <header>
-        <h1>Agora-15</h1>
-        <div class="sub">Sélectionnez un camp, puis utilisez la molette de votre souris.</div>
-    </header>
-
-    <!-- Affichage du premier duo d'opposés fondamentaux -->
-    <div class="duo-container">
-        <div class="bloc-face" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
-        <div class="bloc-face" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+    <div class="scene">
+        <svg viewBox="-160 -160 320 320">
+            <g id="poly-group"></g>
+        </svg>
     </div>
 
     <div id="control-widget">
@@ -76,73 +47,113 @@
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
 
-    <script>
-        const faces = document.querySelectorAll('.duo-container .bloc-face');
+        <script>
+        const canvas = document.getElementById('poly-group');
         const widget = document.getElementById('control-widget');
         const wTitle = document.getElementById('act-name');
-        let sel = null;
+        let selIdx = null;
 
-        function rafraichirCouleurFace(f) {
-            const score = parseInt(f.getAttribute('data-score'));
-            const nomOrigine = f.getAttribute('data-name');
-            const opp = document.getElementById(f.getAttribute('data-opp'));
-            const nomOpposeOrigine = opp.getAttribute('data-name');
-            
-            if (score > 0) {
-                // Coloration de la boîte active en bleu intense selon le score
-                f.style.background = `rgba(0, 122, 255, ${0.15 + (score * 0.085)})`;
-                f.style.color = score > 5 ? '#ffffff' : '#1c1c1e';
-                f.style.borderColor = '#0056b3';
-                f.innerText = nomOrigine + " : +" + score;
-                f.classList.remove('verrouille');
+        const clivages = [
+            { name: "GLOBALISME", opp: 1, score: 0, locked: false },
+            { name: "SOUVERAINISME", opp: 0, score: 0, locked: false }
+        ];
 
-                // Calcul et application stricte de la règle du miroir (-14) sur l'opposé
-                const scoreInverse = -(20 - score);
-                opp.classList.add('verrouille');
-                opp.innerText = nomOpposeOrigine + " : " + scoreInverse;
-                opp.style.background = ''; opp.style.color = '';
-                opp.setAttribute('data-score', '0');
-            } else {
-                // Rétablissement de l'état par défaut (blanc) si le score revient à 0
-                f.style.background = '#ffffff'; f.style.color = '#1c1c1e'; f.style.borderColor = '#007aff';
-                f.innerText = nomOrigine;
-                opp.classList.remove('verrouille');
-                opp.style.background = '#ffffff'; opp.style.color = '#1c1c1e'; opp.style.borderColor = '#007aff';
-                opp.innerText = nomOpposeOrigine;
-            }
+        // Définition rigoureuse des sommets 3D pour les 2 premières faces
+        // v0 = Pointe avant, v1 = Pointe arrière, v2/v4/v6/v8 = Sommets de jointure
+        const v0 = { x: 0, y: 0, z: 100 };
+        const v1 = { x: 0, y: 0, z: -100 };
+        const v2 = { x: 100, y: 0, z: 0 };
+        const v4 = { x: 0, y: 100, z: 0 };
+        const v6 = { x: 70.7, y: 70.7, z: 70.7 };
+        const v7 = { x: 70.7, y: 70.7, z: -70.7 };
+
+        // Projection 3D fixe (Perspective centrale conique stable)
+        function projeter(pt) {
+            const rX = -20 * Math.PI / 180;
+            const rY = 20 * Math.PI / 180;
+            const y1 = pt.y * Math.cos(rX) - pt.z * Math.sin(rX);
+            const z1 = pt.y * Math.sin(rX) + pt.z * Math.cos(rX);
+            const x2 = pt.x * Math.cos(rY) + z1 * Math.sin(rY);
+            return { x: x2, y: y1, z: z1 };
         }
 
-        faces.forEach(f => {
-            f.addEventListener('click', () => {
-                if (f.classList.contains('verrouille')) return;
+        function dessiner() {
+            canvas.innerHTML = '';
+            
+            const p0 = projeter(v0); const p1 = projeter(v1);
+            const p2 = projeter(v2); const p4 = projeter(v4);
+            const p6 = projeter(v6); const p7 = projeter(v7);
+
+            // Construction stricte de deux losanges réels du volume
+            const faces = [
+                { id: 0, pts: [p0, p6, p2, p4], zMoy: (p0.z + p6.z + p2.z + p4.z) / 4 }, // Face Avant
+                { id: 1, pts: [p1, p7, p2, p4], zMoy: (p1.z + p7.z + p2.z + p4.z) / 4 }  // Face Arrière
+            ];
+
+            // Tri par profondeur pour que la face arrière s'affiche derrière la face avant
+            faces.sort((a, b) => a.zMoy - b.zMoy);
+
+            faces.forEach(f => {
+                const data = clivages[f.id];
+                const poly = document.createElementNS("http://w3.org", "polygon");
+                const pStr = f.pts.map(p => `${p.x * 1.3},${p.y * 1.3}`).join(' '); // Échelle x1.3
                 
-                if (sel && sel !== f && !sel.classList.contains('verrouille')) {
-                    rafraichirCouleurFace(sel);
-                }
+                poly.setAttribute("points", pStr);
+                poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
                 
-                sel = f;
-                if (parseInt(f.getAttribute('data-score')) === 0) {
-                    f.style.background = 'rgba(0, 122, 255, 0.3)';
-                }
+                if (selIdx === f.id) poly.style.fill = "rgba(0,122,255,0.4)";
+                else if (data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
+
+                // Centre géométrique du losange pour le texte
+                const cx = (f.pts[0].x + f.pts[1].x + f.pts[2].x + f.pts[3].x) / 4 * 1.3;
+                const cy = (f.pts[0].y + f.pts[1].y + f.pts[2].y + f.pts[3].y) / 4 * 1.3;
+
+                const txt = document.createElementNS("http://w3.org", "text");
+                txt.setAttribute("x", cx); txt.setAttribute("y", cy);
+                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === f.id ? " active" : ""));
                 
-                widget.classList.add('visible');
-                wTitle.innerText = f.getAttribute('data-name') + " (+" + f.getAttribute('data-score') + ")";
+                let label = data.name;
+                if (data.locked) label += " : " + data.score;
+                else if (data.score > 0) label += " : +" + data.score;
+                txt.textContent = label;
+
+                poly.addEventListener('click', () => {
+                    if (data.locked) return;
+                    selIdx = f.id;
+                    widget.classList.add('visible');
+                    wTitle.textContent = data.name + " (+" + data.score + ")";
+                    dessiner();
+                });
+
+                canvas.appendChild(poly);
+                canvas.appendChild(txt);
             });
-        });
+        }
+        
+        dessiner();
 
         window.addEventListener('wheel', (e) => {
-            if (sel && !sel.classList.contains('verrouille')) {
+            if (selIdx !== null && !clivages[selIdx].locked) {
                 e.preventDefault();
-                let score = parseInt(sel.getAttribute('data-score'));
-                score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
+                let s = clivages[selIdx].score;
+                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
                 
-                sel.setAttribute('data-score', score);
-                rafraichirCouleurFace(sel);
-                wTitle.innerText = sel.getAttribute('data-name') + " (+" + score + ")";
+                clivages[selIdx].score = s;
+                const oppIdx = clivages[selIdx].opp;
+                
+                if (s > 0) {
+                    clivages[oppIdx].score = -(20 - s);
+                    clivages[oppIdx].locked = true;
+                } else {
+                    clivages[oppIdx].score = 0;
+                    clivages[oppIdx].locked = false;
+                }
+                
+                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")";
+                dessiner();
             }
         }, { passive: false });
     </script>
 </body>
 </html>
 
-    
