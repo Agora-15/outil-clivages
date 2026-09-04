@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Dodécaèdre 12 Faces</title>
+    <title>Agora-15 | Dodécaèdre Rhombique</title>
     <style>
         body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
         h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
@@ -38,10 +38,9 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('poly-group'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('act-name');
+        const canvas = document.getElementById('poly-group'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('active-face-name');
         let drag = false, rX = -20, rY = 20, cX = -20, cY = 20, vX = 0, vY = 0, lX = 0, lY = 0, selIdx = null;
 
-        // Base de données des 6 couples de clivages pour vêtir les 12 faces du solide
         const clivages = [
             { name: "GLOBALISME", opp: 1, score: 0, locked: false }, { name: "SOUVERAINISME", opp: 0, score: 0, locked: false },
             { name: "ÉGALITARISME", opp: 3, score: 0, locked: false }, { name: "MÉRITOCRATIE", opp: 2, score: 0, locked: false },
@@ -51,19 +50,18 @@
             { name: "ROYALISME", opp: 11, score: 0, locked: false }, { name: "RÉPUBLICANISME", opp: 10, score: 0, locked: false }
         ];
 
-        // Mathématiques tridimensionnelles du Dodécaèdre Rhombique (14 sommets réels)
         const d = 100, h = d / Math.sqrt(2);
         const sommets = [
             [0,0,d], [0,0,-d], [d,0,0], [-d,0,0], [0,d,0], [0,-d,0],
             [h,h,h], [h,h,-h], [h,-h,h], [h,-h,-h], [-h,h,h], [-h,h,-h], [-h,-h,h], [-h,-h,-h]
         ];
 
-        // Définition géométrique des 12 losanges par l'index de leurs sommets
-        const facesIndex = [, [1,9,2,7], [0,10,3,12], [1,13,3,11], [4,6,0,10], [5,12,0,8],
-, [5,9,1,13], [2,6,4,7], [2,8,5,9], [3,11,4,10], [3,13,5,12]
+        // Lignes réparées : Index géométriques complets pour lier les sommets en 12 losanges
+        const facesIndex = [, [1, 7, 2, 9], [0, 10, 3, 12], [1, 11, 3, 13],
+, [1, 7, 4, 11], [0, 8, 5, 12], [1, 9, 5, 13],
+, [2, 8, 5, 9], [3, 10, 4, 11], [3, 12, 5, 13]
         ];
 
-        // Matrice de projection 3D vers 2D
         function projeter(x, y, z) {
             const radX = rX * Math.PI / 180, radY = rY * Math.PI / 180;
             const cosX = Math.cos(radX), sinX = Math.sin(radX);
@@ -74,19 +72,16 @@
             return { x: x2, y: y1, z: z1 };
         }
 
-        // Rendu permanent et gestion de la profondeur (Z-ordering)
         function dessiner() {
             canvas.innerHTML = '';
             let listeFaces = [];
 
             facesIndex.forEach((fIdx, index) => {
                 let pts = fIdx.map(i => projeter(...sommets[i]));
-                // Centre de gravité Z de la face pour calculer la visibilité
                 let zMoy = (pts[0].z + pts[1].z + pts[2].z + pts[3].z) / 4;
                 listeFaces.push({ index: index, pts: pts, zMoy: zMoy });
             });
 
-            // Tri pour afficher les faces arrières en premier
             listeFaces.sort((a, b) => a.zMoy - b.zMoy);
 
             listeFaces.forEach(f => {
@@ -99,7 +94,6 @@
                 if(selIdx === f.index) poly.style.fill = "rgba(0,122,255,0.4)";
                 else if(data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
 
-                // Centre de la face pour positionner le texte au milieu du losange
                 let cx = (f.pts[0].x + f.pts[1].x + f.pts[2].x + f.pts[3].x) / 4;
                 let cy = (f.pts[0].y + f.pts[1].y + f.pts[2].y + f.pts[3].y) / 4;
 
@@ -116,7 +110,7 @@
                     if (data.locked) return;
                     selIdx = f.index;
                     widget.classList.add('visible');
-                    wTitle.innerText = data.name + " (+" + data.score + ")";
+                    wTitle.textContent = data.name + " (+" + data.score + ")";
                     dessiner();
                 });
 
@@ -125,7 +119,6 @@
             });
         }
 
-        // --- INTERACTION ROTATION SOURIS/TACTILE ---
         document.getElementById('scene').addEventListener('mousedown', (e) => { drag = true; vX = 0; vY = 0; lX = e.clientX; lY = e.clientY; });
         window.addEventListener('mousemove', (e) => { if (!drag) return; vY = (e.clientX - lX) * 0.4; vX = (e.clientY - lY) * 0.4; cY += vY; cX -= vX; lX = e.clientX; lY = e.clientY; });
         window.addEventListener('mouseup', () => { drag = false; });
@@ -141,7 +134,6 @@
         }
         phys();
 
-        // --- GESTION DE LA MOLETTE ET REGLE DU MIROIR (-14) ---
         window.addEventListener('wheel', (e) => {
             if (selIdx !== null && !clivages[selIdx].locked) {
                 e.preventDefault();
@@ -157,7 +149,7 @@
                     clivages[oppIdx].score = 0;
                     clivages[oppIdx].locked = false;
                 }
-                wTitle.innerText = clivages[selIdx].name + " (+" + s + ")";
+                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")";
                 dessiner();
             }
         }, { passive: false });
