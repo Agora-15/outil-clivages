@@ -2,168 +2,116 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Modèle Moléculaire Corrigé</title>
+    <title>Agora-15 | Socle Stable Corrigé</title>
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #ffffff;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden;
-            user-select: none;
-        }
-        h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
-        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; user-select:none; }
+        h1 { position:absolute; top:30px; text-transform:uppercase; letter-spacing:2px; font-weight:300; }
+        p { position:absolute; top:80px; color:#8e8e93; font-size:14px; text-align:center; }
+        .scene { width:220px; height:220px; perspective:600px; margin-top:20px; cursor:grab; }
+        .scene:active { cursor:grabbing; }
+        .cube { width:100%; height:100%; position:relative; transform-style:preserve-3d; transform:rotateX(-20deg) rotateY(20deg); }
+        .face { position:absolute; width:80px; height:80px; left:70px; top:70px; border:2px solid #007aff; border-radius:50%; background:rgba(255,255,255,0.9); color:#1c1c1e; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:600; text-align:center; box-sizing:border-box; padding:5px; backface-visibility:visible; cursor:pointer; transition:all 0.2s; }
+        .face.locked { background:rgba(142,142,147,0.18)!important; color:#4a4a4a!important; border-color:#8e8e93!important; cursor:not-allowed!important; font-weight:500; }
         
-        .scene { width: 300px; height: 300px; perspective: 700px; margin-top: 20px; cursor: grab; }
-        .scene:active { cursor: grabbing; }
+        /* 1er niveau de la ceinture : 5 cercles verticaux espacés de 72° */
+        .fV0  { transform: rotateY(   0deg) translateZ(110px); }
+        .fV1  { transform: rotateY(  72deg) translateZ(110px); }
+        .fV2  { transform: rotateY( 144deg) translateZ(110px); }
+        .fV3  { transform: rotateY( 216deg) translateZ(110px); }
+        .fV4  { transform: rotateY( 288deg) translateZ(110px); }
         
-        .structure {
-            width: 100%; height: 100%; position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(20deg);
-        }
+        /* 2ème niveau de la ceinture : 5 cercles verticaux alternés (décalés de 36°) */
+        .fV5  { transform: rotateY(  36deg) translateZ(110px); }
+        .fV6  { transform: rotateY( 108deg) translateZ(110px); }
+        .fV7  { transform: rotateY( 180deg) translateZ(110px); }
+        .fV8  { transform: rotateY( 252deg) translateZ(110px); }
+        .fV9  { transform: rotateY( 324deg) translateZ(110px); }
         
-        .face {
-            position: absolute; width: 80px; height: 80px;
-            left: 110px; top: 110px;
-            border: 1.5px solid #007aff;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.85);
-            color: #1c1c1e;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 8px; font-weight: bold; text-align: center;
-            box-sizing: border-box; padding: 5px;
-            backface-visibility: visible; cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        /* Les 2 Axes Inclinés à 45° */
+        .fA0  { transform: rotateX(  45deg) translateZ(110px); }
+        .fA1  { transform: rotateX(-135deg) translateZ(110px); }
         
-        .face.locked {
-            background: rgba(142, 142, 147, 0.18) !important;
-            color: #4a4a4a !important;
-            border-color: #8e8e93 !important;
-            cursor: not-allowed !important;
-        }
-        
-        /* APPLICATION STRICTE DE VOS DEUX POINTS GÉOMÉTRIQUES */
-        /* Niveau A de la ceinture : 5 cercles verticaux à 0° (Espacés de 72°) */
-        .fV0  { transform: rotateY(   0deg) translateZ(100px); }
-        .fV1  { transform: rotateY(  72deg) translateZ(100px); }
-        .fV2  { transform: rotateY( 144deg) translateZ(100px); }
-        .fV3  { transform: rotateY( 216deg) translateZ(100px); }
-        .fV4  { transform: rotateY( 288deg) translateZ(100px); }
-        
-        /* Niveau B de la ceinture : 5 cercles verticaux à 0° (Alternés/Décalés de 36°) */
-        .fV5  { transform: rotateY(  36deg) translateZ(100px); }
-        .fV6  { transform: rotateY( 108deg) translateZ(100px); }
-        .fV7  { transform: rotateY( 180deg) translateZ(100px); }
-        .fV8  { transform: rotateY( 252deg) translateZ(100px); }
-        .fV9  { transform: rotateY( 324deg) translateZ(100px); }
-        
-        /* Les 2 Axes Inclinés Restants à 45° */
-        .fA0  { transform: rotateX(  45deg) translateZ(100px); }
-        .fA1  { transform: rotateX(-135deg) translateZ(100px); }
-
-        #control-widget {
-            position: absolute; bottom: 40px;
-            background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea;
-            padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            text-align: center; min-width: 280px; opacity: 0; transform: translateY(20px);
-            transition: all 0.4s; pointer-events: none;
-        }
-        #control-widget.visible { opacity: 1; transform: translateY(0); }
-        .widget-title { font-size: 15px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
-        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
+        #control-widget { position:absolute; bottom:40px; background:rgba(255,255,255,0.95); border:1px solid #e5e5ea; padding:15px 45px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,0.05); text-align:center; min-width:280px; opacity:0; transform:translateY(20px); transition:all 0.4s; pointer-events:none; }
+        #control-widget.visible { opacity:1; transform:translateY(0); }
+        .widget-title { font-size:16px; font-weight:600; color:#1c1c1e; margin-bottom:4px; }
+        .scroll-instruction { font-size:12px; color:#007aff; font-weight:500; }
     </style>
 </head>
 <body>
-
     <h1>Agora-15</h1>
-    <p>Ceinture de 10 disques (2 niveaux alternés de 5), 2 inclinés, 0 horizontaux.</p>
-
+    <p>Ceinture de 10 cercles (2 niveaux de 5), 2 inclinés, 0 horizontaux.</p>
     <div class="scene" id="scene">
-        <div class="structure" id="structure">
-            <!-- Ceinture - Niveau A -->
-            <div class="face fV0" id="face-0" data-opp="face-7" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
-            <div class="face fV1" id="face-2" data-opp="face-8" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
-            <div class="face fV2" id="face-4" data-opp="face-9" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
-            <div class="face fV3" id="face-6" data-opp="face-1" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
-            <div class="face fV4" id="face-10" data-opp="face-5" data-name="ROYALISME" data-score="0">ROYALISME</div>
+        <div class="cube" id="cube">
+            <!-- Ceinture - 1er Niveau de 5 -->
+            <div class="face fV0" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="face fV1" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="face fV2" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="face fV3" id="f-femi" data-opp="f-patr" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
+            <div class="face fV4" id="f-esse" data-opp="f-cons" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
             
-            <!-- Ceinture - Niveau B -->
-            <div class="face fV5" id="face-12" data-opp="face-3" data-name="LIBÉRALISME" data-score="0">LIBÉRALISME</div>
-            <div class="face fV6" id="face-14" data-opp="face-11" data-name="UNIVERSALISME" data-score="0">UNIVERSALISME</div>
-            <div class="face fV7" id="face-7" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
-            <div class="face fV8" id="face-8" data-opp="face-2" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
-            <div class="face fV9" id="face-9" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
+            <!-- Ceinture - 2ème Niveau de 5 -->
+            <div class="face fV5" id="f-roya" data-opp="f-repu" data-name="ROYALISME" data-score="0">ROYALISME</div>
+            <div class="face fV6" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+            <div class="face fV7" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+            <div class="face fV8" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
+            <div class="face fV9" id="f-patr" data-opp="f-femi" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
             
-            <!-- Les restants -->
-            <div class="face fV6" id="face-1" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
-            <div class="face fV9" id="face-5" data-opp="face-10" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
-            <div class="face fV12" id="face-3" data-opp="face-12" data-name="PROTECTIONNISME" data-score="0">PROTECTIONNISME</div>
-            <div class="face fV14" id="face-11" data-opp="face-14" data-name="COMMUNAUTARISME" data-score="0">COMMUNAUTARISME</div>
-            
-            <div class="face fA0" id="face-18" data-opp="face-19" data-name="PROGRESSISME" data-score="0">PROGRESSISME</div>
-            <div class="face fA1" id="face-19" data-opp="face-18" data-name="CONSERVATISME" data-score="0">CONSERVATISME</div>
+            <!-- Les 2 Axes Inclinés Restants -->
+            <div class="face fA0" id="f-cons" data-opp="f-esse" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
+            <div class="face fA1" id="f-repu" data-opp="f-roya" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
         </div>
     </div>
     <div id="control-widget">
-        <div class="widget-title" id="active-face-name">Clivage</div>
+        <div class="widget-title" id="act-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
     <script>
-        const scene = document.getElementById('scene'), structure = document.getElementById('structure'), faces = document.querySelectorAll('.face'), widget = document.getElementById('control-widget'), widgetTitle = document.getElementById('active-face-name');
-        let drag = false, cibleX = -20, cibleY = 20, rotationX = -20, rotationY = 20, vitesseX = 0, vitesseY = 0, dernierX = 0, dernierY = 0, faceSelectionnee = null;
+        const scene=document.getElementById('scene'), cube=document.getElementById('cube'), faces=document.querySelectorAll('.face'), widget=document.getElementById('control-widget'), wTitle=document.getElementById('act-name');
+        let drag=false, cX=-20, cY=20, rX=-20, rY=20, vX=0, vY=0, lX=0, lY=0, sel=null;
+        
+        scene.addEventListener('mousedown', (e)=>{ drag=true; vX=0; vY=0; lX=e.clientX; lY=e.clientY; });
+        window.addEventListener('mousemove', (e)=>{ if(!drag)return; const dX=e.clientX-lX, dY=e.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.clientX; lY=e.clientY; });
+        window.addEventListener('mouseup', ()=>{ drag=false; });
+        scene.addEventListener('touchstart', (e)=>{ drag=true; vX=0; vY=0; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
+        window.addEventListener('touchmove', (e)=>{ if(!drag)return; const dX=e.touches.clientX-lX, dY=e.touches.clientY-lY; vY=dX*0.35; vX=dY*0.35; cY+=vY; cX-=vX; lX=e.touches.clientX; lY=e.touches.clientY; }, {passive:true});
+        window.addEventListener('touchend', ()=>{ drag=false; });
 
-        scene.addEventListener('mousedown', (e) => {
-            drag = true; vitesseX = 0; vitesseY = 0;
-            dernierX = e.clientX; dernierY = e.clientY;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!drag) return;
-            const deltaX = e.clientX - dernierX, deltaY = e.clientY - dernierY;
-            vitesseY = deltaX * 0.35; vitesseX = deltaY * 0.35;
-            cibleY += vitesseY; cibleX -= vitesseX;
-            dernierX = e.clientX; dernierY = e.clientY;
-        });
-
-        window.addEventListener('mouseup', () => { drag = false; });
-
-        function bouclePhysique() {
-            if (!drag) { vitesseX *= 0.975; vitesseY *= 0.975; cibleY += vitesseY; cibleX -= vitesseX; }
-            rotationX += (cibleX - rotationX) * 0.12; rotationY += (cibleY - rotationY) * 0.12;
-            structure.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-            requestAnimationFrame(bouclePhysique);
+        function phys() {
+            if(!drag){ vX*=0.975; vY*=0.975; cY+=vY; cX-=vX; }
+            rX+=(cX-rX)*0.12; rY+=(cY-rY)*0.12;
+            cube.style.transform=`rotateX(${rX}deg) rotateY(${rY}deg)`;
+            requestAnimationFrame(phys);
         }
-        bouclePhysique();
+        phys();
 
-        function rafraichirCouleurFace(face) {
-            const score = parseInt(face.getAttribute('data-score')), nomOrigine = face.getAttribute('data-name'), faceOpposee = document.getElementById(face.getAttribute('data-opp')), nomOpposeOrigine = faceOpposee.getAttribute('data-name');
-            if (score > 0) {
-                face.style.background = `rgba(0, 122, 255, ${0.2 + (score * 0.07)})`; face.style.color = score > 5 ? '#ffffff' : '#1c1c1e'; face.style.borderColor = '#0056b3'; face.innerText = nomOrigine + " : +" + score; face.classList.remove('locked');
-                faceOpposee.classList.add('locked'); faceOpposee.innerText = nomOpposeOrigine + " : " + (-(20 - score)); faceOpposee.style.background = ''; faceOpposee.style.color = ''; faceOpposee.setAttribute('data-score', '0'); 
-            } else {
-                face.style.background = 'rgba(255, 255, 255, 0.85)'; face.style.color = '#1c1c1e'; face.style.borderColor = '#007aff'; face.innerText = nomOrigine;
-                faceOpposee.classList.remove('locked'); faceOpposee.style.background = 'rgba(255, 255, 255, 0.85)'; faceOpposee.style.color = '#1c1c1e'; faceOpposee.style.borderColor = '#007aff'; faceOpposee.innerText = nomOpposeOrigine;
+        function color(f) {
+            const s=parseInt(f.getAttribute('data-score')), n=f.getAttribute('data-name'), opp=document.getElementById(f.getAttribute('data-opp')), oName=opp.getAttribute('data-name');
+            if(s>0){
+                f.style.background=`rgba(0,122,255,${0.2+(s*0.07)})`; f.style.color=s>5?'#fff':'#1c1c1e'; f.style.borderColor='#0056b3'; f.innerText=n+" : +"+s; f.classList.remove('locked');
+                const scoreInverse = -(20 - s);
+                opp.classList.add('locked'); opp.innerText=oName+" : "+scoreInverse; opp.style.background=''; opp.style.color=''; opp.setAttribute('data-score','0');
+            }else{
+                f.style.background='rgba(255,255,255,0.9)'; f.style.color='#1c1c1e'; f.style.borderColor='#007aff'; f.innerText=n;
+                opp.classList.remove('locked'); opp.style.background='rgba(255,255,255,0.9)'; opp.style.color='#1c1c1e'; opp.style.borderColor='#007aff'; opp.innerText=oName;
             }
         }
 
-        faces.forEach(face => {
-            face.addEventListener('click', () => {
-                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3 || face.classList.contains('locked')) return;
-                if (faceSelectionnee && faceSelectionnee !== face && !faceSelectionnee.classList.contains('locked')) rafraichirCouleurFace(faceSelectionnee);
-                faceSelectionnee = face;
-                if (parseInt(face.getAttribute('data-score')) === 0) face.style.background = 'rgba(0, 122, 255, 0.4)';
-                widget.classList.add('visible'); widgetTitle.innerText = face.getAttribute('data-name') + " (+" + face.getAttribute('data-score') + ")";
+        faces.forEach(f => {
+            f.addEventListener('click', ()=>{
+                if(Math.abs(vX)>0.3 || Math.abs(vY)>0.3 || f.classList.contains('locked'))return;
+                if(sel && sel!==f && !sel.classList.contains('locked')) color(sel);
+                sel=f; if(parseInt(f.getAttribute('data-score'))===0) f.style.background='rgba(0,122,255,0.4)';
+                widget.classList.add('visible'); wTitle.innerText=f.getAttribute('data-name')+" (+"+f.getAttribute('data-score')+")";
             });
         });
 
-        window.addEventListener('wheel', (e) => {
-            if (faceSelectionnee && !faceSelectionnee.classList.contains('locked')) {
-                e.preventDefault(); let score = parseInt(faceSelectionnee.getAttribute('data-score'));
-                score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
-                faceSelectionnee.setAttribute('data-score', score); rafraichirCouleurFace(faceSelectionnee);
-                widgetTitle.innerText = faceSelectionnee.getAttribute('data-name') + " (+" + score + ")";
+        window.addEventListener('wheel', (e)=>{
+            if(sel && !sel.classList.contains('locked')){
+                e.preventDefault();
+                let s=parseInt(sel.getAttribute('data-score'));
+                s = e.deltaY<0 ? Math.min(s+1,10) : Math.max(s-1,0);
+                sel.setAttribute('data-score', s); color(sel);
+                wTitle.innerText=sel.getAttribute('data-name')+" (+" + s + ")";
             }
         }, { passive: false });
     </script>
