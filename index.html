@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Cube avec Inertie</title>
+    <title>Agora-15 | Inertie Fluide</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -21,7 +21,7 @@
             width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
             transform: rotateX(-20deg) rotateY(20deg);
-            /* Suppression de la transition CSS pour laisser le script JavaScript gérer l'inertie de manière fluide */
+            will-change: transform; /* Optimisation pour carte graphique */
         }
         
         .face {
@@ -55,7 +55,7 @@
 <body>
 
     <h1>Agora-15</h1>
-    <p>Étape 4 : Lancez le cube avec votre souris et observez l'effet d'inertie quand vous lâchez.</p>
+    <p>Étape 4.5 : Test d'inertie ultra-fluide cinétique</p>
 
     <div class="scene" id="scene">
         <div class="cube" id="cube">
@@ -74,19 +74,26 @@
         const faces = document.querySelectorAll('.face');
 
         let estEnTrainDeGlisser = false;
+        
+        // Positions cibles (où le cube VEUT aller)
+        let cibleX = -20;
+        let cibleY = 20;
+        
+        // Positions actuelles (où le cube EST réellement, calculé en continu)
         let rotationX = -20;
         let rotationY = 20;
 
-        // Variables physiques pour calculer la vitesse et l'inertie
         let vitesseX = 0;
         let vitesseY = 0;
         let dernierX = 0;
         let dernierY = 0;
-        const friction = 0.95; // Plus le chiffre est bas, plus le cube s'arrête vite (0.95 = glisse longue)
+        
+        // Paramètres physiques ajustés pour un effet velours
+        const friction = 0.975; // Glisse plus longue et soyeuse
+        const sensibilite = 0.35;
 
         function CommencerGlisser(e) {
             estEnTrainDeGlisser = true;
-            // On stoppe l'inertie précédente dès qu'on retouche le cube
             vitesseX = 0;
             vitesseY = 0;
             
@@ -100,18 +107,14 @@
             const x = e.clientX || (e.touches && e.touches[0].clientX);
             const y = e.clientY || (e.touches && e.touches[0].clientY);
             
-            // Calcul du déplacement depuis la dernière image
             const deltaX = x - dernierX;
             const deltaY = y - dernierY;
 
-            // La vitesse dépend de la force de votre geste
-            vitesseY = deltaX * 0.4;
-            vitesseX = deltaY * 0.4;
+            vitesseY = deltaX * sensibilite;
+            vitesseX = deltaY * sensibilite;
 
-            rotationY += vitesseY;
-            rotationX -= vitesseX;
-
-            cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            cibleY += vitesseY;
+            cibleX -= vitesseX;
 
             dernierX = x;
             dernierY = y;
@@ -121,48 +124,42 @@
             estEnTrainDeGlisser = false;
         }
 
-        // Événements Souris
         scene.addEventListener('mousedown', CommencerGlisser);
         window.addEventListener('mousemove', Glisser);
         window.addEventListener('mouseup', ArreterGlisser);
 
-        // Événements Tactiles
-        scene.addEventListener('touchstart', CommencerGlisser);
-        window.addEventListener('touchmove', Glisser);
+        scene.addEventListener('touchstart', CommencerGlisser, { passive: true });
+        window.addEventListener('touchmove', Glisser, { passive: true });
         window.addEventListener('touchend', ArreterGlisser);
 
-        // --- BOUCLE DE RENDER PERMANENTE POUR L'INERTIE ---
-        function mettreAJourPhysique() {
-            // Si l'utilisateur ne touche plus le cube, la physique prend le relais
+        // --- ENGIN DE SMOOTHING ET DE PHYSIQUE CONTINU ---
+        function bouclePhysique() {
             if (!estEnTrainDeGlisser) {
-                // Application de la friction pour ralentir les vitesses à chaque seconde
+                // Ralentissement progressif de la vitesse
                 vitesseX *= friction;
                 vitesseY *= friction;
 
-                // Si le mouvement devient minuscule, on l'arrête pour économiser l'écran
-                if (Math.abs(vitesseX) < 0.01) vitesseX = 0;
-                if (Math.abs(vitesseY) < 0.01) vitesseY = 0;
-
-                // Le cube continue sa rotation selon sa vitesse restante
-                rotationY += vitesseY;
-                rotationX -= vitesseX;
-
-                cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+                // Application de la vitesse restante sur la cible
+                cibleY += vitesseY;
+                cibleX -= vitesseX;
             }
+
+            // L'interpolation linéaire (LERP) : le secret de la fluidité absolue.
+            // On avance vers la cible par tranche de 12% à chaque image.
+            rotationX += (cibleX - rotationX) * 0.12;
+            rotationY += (cibleY - rotationY) * 0.12;
+
+            cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
             
-            // Relance la fonction en continu de manière ultra-fluide (60 fois par seconde)
-            requestAnimationFrame(mettreAJourPhysique);
+            requestAnimationFrame(bouclePhysique);
         }
         
-        // Lancement immédiat de la boucle physique
-        mettreAJourPhysique();
+        bouclePhysique();
 
-        // --- GESTION DU CLIC SUR UNE FACE ---
+        // --- CLIC FACE ---
         faces.forEach(face => {
             face.addEventListener('click', (e) => {
-                // Si le cube bouge encore beaucoup, on refuse le clic pour ne pas perturber la rotation
-                if (Math.abs(vitesseX) > 0.5 || Math.abs(vitesseY) > 0.5) return;
-                
+                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3) return;
                 faces.forEach(f => f.classList.remove('active'));
                 face.classList.add('active');
             });
