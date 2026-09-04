@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Intensité Molette</title>
+    <title>Agora-15 | Miroir et Verrouillage</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -35,10 +35,16 @@
             box-shadow: inset 0 0 20px rgba(0, 122, 255, 0.05);
             backface-visibility: visible;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            transition: all 0.2s ease;
         }
         
-        /* Positionnement des faces */
+        .face.locked {
+            background: rgba(142, 142, 147, 0.15) !important;
+            color: #aeaea3 !important;
+            border-color: #d1d1d6 !important;
+            cursor: not-allowed !important;
+        }
+        
         .front  { transform: rotateY(  0deg) translateZ(110px); }
         .back   { transform: rotateY(180deg) translateZ(110px); }
         .right  { transform: rotateY( 90deg) translateZ(110px); }
@@ -46,7 +52,6 @@
         .top    { transform: rotateX( 90deg) translateZ(110px); }
         .bottom { transform: rotateX(-90deg) translateZ(110px); }
 
-        /* Style élégant pour la fenêtre d'intensité en bas */
         #control-widget {
             position: absolute;
             bottom: 40px;
@@ -63,43 +68,29 @@
             pointer-events: none;
         }
 
-        #control-widget.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .widget-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1c1c1e;
-            margin-bottom: 4px;
-        }
-
-        .scroll-instruction {
-            font-size: 12px;
-            color: #007aff;
-            font-weight: 500;
-        }
+        #control-widget.visible { opacity: 1; transform: translateY(0); }
+        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
+        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <h1>Agora-15</h1>
-    <p>Étape 5 : Cliquez sur un clivage, puis utilisez la molette de votre souris pour ajuster sa force.</p>
+    <p>Étape 6 : Renseignez un clivage. Son opposé affichera la valeur miroir et sera verrouillé.</p>
 
     <div class="scene" id="scene">
         <div class="cube" id="cube">
-            <!-- Chaque face stocke son propre score par défaut à 0 -->
-            <div class="face front" data-score="0">GLOBALISME</div>
-            <div class="face back" data-score="0">SOUVERAINISME</div>
-            <div class="face right" data-score="0">ÉGALITARISME</div>
-            <div class="face left" data-score="0">MÉRITOCRATIE</div>
-            <div class="face top" data-score="0">TECHNOCRATIE</div>
-            <div class="face bottom" data-score="0">POPULISME</div>
+            <div class="face front" id="face-globalisme" data-opposable="face-souverainisme" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="face back" id="face-souverainisme" data-opposable="face-globalisme" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+            
+            <div class="face right" id="face-egalitarisme" data-opposable="face-meritocratie" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="face left" id="face-meritocratie" data-opposable="face-egalitarisme" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+            
+            <div class="face top" id="face-technocratie" data-opposable="face-populisme" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="face bottom" id="face-populisme" data-opposable="face-technocratie" data-name="POPULISME" data-score="0">POPULISME</div>
         </div>
     </div>
 
-    <!-- Le Widget du bas -->
     <div id="control-widget">
         <div class="widget-title" id="active-face-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster de 0 à +10</div>
@@ -133,14 +124,9 @@
             if (!estEnTrainDeGlisser) return;
             const x = e.clientX || (e.touches && e.touches.clientX);
             const y = e.clientY || (e.touches && e.touches.clientY);
-            const deltaX = x - dernierX;
-            const deltaY = y - dernierY;
-
-            vitesseY = deltaX * sensibilite;
-            vitesseX = deltaY * sensibilite;
-            cibleY += vitesseY;
-            cibleX -= vitesseX;
-
+            const deltaX = x - dernierX; const deltaY = y - dernierY;
+            vitesseY = deltaX * sensibilite; vitesseX = deltaY * sensibilite;
+            cibleY += vitesseY; cibleX -= vitesseX;
             dernierX = x; dernierY = y;
         }
 
@@ -165,72 +151,74 @@
         }
         bouclePhysique();
 
-        // --- APPLIQUER LA COULEUR SELON LE SCORE ---
         function rafraichirCouleurFace(face) {
             const score = parseInt(face.getAttribute('data-score'));
-            const texteOrigine = face.innerText.split(" :")[0];
+            const nomOrigine = face.getAttribute('data-name');
+            const idOppose = face.getAttribute('data-opposable');
+            const faceOpposee = document.getElementById(idOppose);
+            const nomOpposeOrigine = faceOpposee.getAttribute('data-name');
             
             if (score > 0) {
-                // Plus le score est élevé, plus le fond bleu devient opaque et le texte blanc
                 face.style.background = `rgba(0, 122, 255, ${0.2 + (score * 0.07)})`;
                 face.style.color = score > 5 ? '#ffffff' : '#1c1c1e';
                 face.style.borderColor = '#0056b3';
-                face.innerText = `${texteOrigine} : +${score}`;
+                face.innerText = nomOrigine + " : +" + score;
+                face.classList.remove('locked');
+
+                const scoreMiroir = -(20 - score); 
+                faceOpposee.classList.add('locked');
+                faceOpposee.innerText = nomOpposeOrigine + " : " + scoreMiroir;
+                faceOpposee.style.background = ''; 
+                faceOpposee.style.color = '';
+                faceOpposee.setAttribute('data-score', '0'); 
             } else {
-                // Remise à zéro si le score vaut 0
                 face.style.background = 'rgba(255, 255, 255, 0.9)';
                 face.style.color = '#1c1c1e';
                 face.style.borderColor = '#007aff';
-                face.innerText = texteOrigine;
+                face.innerText = nomOrigine;
+
+                faceOpposee.classList.remove('locked');
+                faceOpposee.style.background = 'rgba(255, 255, 255, 0.9)';
+                faceOpposee.style.color = '#1c1c1e';
+                faceOpposee.style.borderColor = '#007aff';
+                faceOpposee.innerText = nomOpposeOrigine;
             }
         }
 
-        // --- CLIC FACE ---
         faces.forEach(face => {
             face.addEventListener('click', (e) => {
                 if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3) return;
+                if (face.classList.contains('locked')) return;
                 
-                // Réinitialiser visuellement la face précédente si elle n'a pas de points
-                if (faceSelectionnee && faceSelectionnee !== face) {
+                if (faceSelectionnee && faceSelectionnee !== face && !faceSelectionnee.classList.contains('locked')) {
                     rafraichirCouleurFace(faceSelectionnee);
                 }
 
                 faceSelectionnee = face;
                 
-                // Mettre en surbrillance immédiate la face active
-                face.style.background = 'rgba(0, 122, 255, 0.4)';
+                if (parseInt(face.getAttribute('data-score')) === 0) {
+                    face.style.background = 'rgba(0, 122, 255, 0.4)';
+                }
                 
-                // Activer le widget textuel du bas
                 widget.classList.add('visible');
-                const texteNettoye = face.innerText.split(" :")[0];
+                const nomOrigine = face.getAttribute('data-name');
                 const scoreActuel = face.getAttribute('data-score');
-                widgetTitle.innerText = `${texteNettoye} (+${scoreActuel})`;
+                widgetTitle.innerText = nomOrigine + " (+" + scoreActuel + ")";
             });
         });
 
-        // --- CAPTURE DE LA MOLETTE POUR LA NOTATION ---
         window.addEventListener('wheel', (e) => {
-            if (faceSelectionnee) {
-                // On récupère le score actuel de la face
+            if (faceSelectionnee && !faceSelectionnee.classList.contains('locked')) {
                 let score = parseInt(faceSelectionnee.getAttribute('data-score'));
                 
-                // Détection du sens de la molette
                 if (e.deltaY < 0) {
-                    score = Math.min(score + 1, 10); // Augmenter jusqu'à 10 max
+                    score = Math.min(score + 1, 10);
                 } else {
-                    score = Math.max(score - 1, 0);  // Diminuer jusqu'à 0 min
+                    score = Math.max(score - 1, 0);
                 }
-                
-                // Sauvegarde du score dans la face
                 faceSelectionnee.setAttribute('data-score', score);
-                
-                // Mise à jour visuelle immédiate
-                rafraichirCouleurFace(faceSelectionnee);
-                
-                const texteNettoye = faceSelectionnee.innerText.split(" :")[0];
-                widgetTitle.innerText = `${texteNettoye} (+${score})`;
-            }
-        });
-    </script>
-</body>
-</html>
+rafraichirCouleurFace(faceSelectionnee);
+
+const nomOrigine = faceSelectionnee.getAttribute('data-name');
+widgetTitle.innerText = nomOrigine + " (+" + score + ")";
+
