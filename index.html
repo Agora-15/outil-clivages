@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | Cube Interactif</title>
+    <title>Agora-15 | Cube avec Inertie</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -14,15 +14,14 @@
         h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
         p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
         
-        /* Conteneur 3D réactif à la souris */
         .scene { width: 220px; height: 220px; perspective: 600px; margin-top: 50px; cursor: grab; }
         .scene:active { cursor: grabbing; }
         
         .cube {
             width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(20deg); /* Position de départ fixe */
-            transition: transform 0.1s ease-out;
+            transform: rotateX(-20deg) rotateY(20deg);
+            /* Suppression de la transition CSS pour laisser le script JavaScript gérer l'inertie de manière fluide */
         }
         
         .face {
@@ -39,7 +38,6 @@
             transition: background 0.3s, color 0.3s;
         }
         
-        /* Face sélectionnée par le clic */
         .face.active {
             background: rgba(0, 122, 255, 0.8) !important;
             color: #ffffff !important;
@@ -57,7 +55,7 @@
 <body>
 
     <h1>Agora-15</h1>
-    <p>Étape 3 : Maintenez le clic enfoncé pour tourner le cube. Cliquez sur une face pour l'activer.</p>
+    <p>Étape 4 : Lancez le cube avec votre souris et observez l'effet d'inertie quand vous lâchez.</p>
 
     <div class="scene" id="scene">
         <div class="cube" id="cube">
@@ -76,33 +74,47 @@
         const faces = document.querySelectorAll('.face');
 
         let estEnTrainDeGlisser = false;
-        let precedentX = 0;
-        let precedentY = 0;
         let rotationX = -20;
         let rotationY = 20;
 
-        // --- GESTION DE LA ROTATION SOURIS/TACTILE ---
+        // Variables physiques pour calculer la vitesse et l'inertie
+        let vitesseX = 0;
+        let vitesseY = 0;
+        let dernierX = 0;
+        let dernierY = 0;
+        const friction = 0.95; // Plus le chiffre est bas, plus le cube s'arrête vite (0.95 = glisse longue)
+
         function CommencerGlisser(e) {
             estEnTrainDeGlisser = true;
-            precedentX = e.clientX || e.touches[0].clientX;
-            precedentY = e.clientY || e.touches[0].clientY;
+            // On stoppe l'inertie précédente dès qu'on retouche le cube
+            vitesseX = 0;
+            vitesseY = 0;
+            
+            dernierX = e.clientX || (e.touches && e.touches[0].clientX);
+            dernierY = e.clientY || (e.touches && e.touches[0].clientY);
         }
 
         function Glisser(e) {
             if (!estEnTrainDeGlisser) return;
-            const x = e.clientX || e.touches[0].clientX;
-            const y = e.clientY || e.touches[0].clientY;
             
-            const deltaX = x - precedentX;
-            const deltaY = y - precedentY;
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            // Calcul du déplacement depuis la dernière image
+            const deltaX = x - dernierX;
+            const deltaY = y - dernierY;
 
-            rotationY += deltaX * 0.5;
-            rotationX -= deltaY * 0.5;
+            // La vitesse dépend de la force de votre geste
+            vitesseY = deltaX * 0.4;
+            vitesseX = deltaY * 0.4;
+
+            rotationY += vitesseY;
+            rotationX -= vitesseX;
 
             cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
 
-            precedentX = x;
-            precedentY = y;
+            dernierX = x;
+            dernierY = y;
         }
 
         function ArreterGlisser() {
@@ -114,21 +126,44 @@
         window.addEventListener('mousemove', Glisser);
         window.addEventListener('mouseup', ArreterGlisser);
 
-        // Événements Écran Tactile (Mobile)
+        // Événements Tactiles
         scene.addEventListener('touchstart', CommencerGlisser);
         window.addEventListener('touchmove', Glisser);
         window.addEventListener('touchend', ArreterGlisser);
 
+        // --- BOUCLE DE RENDER PERMANENTE POUR L'INERTIE ---
+        function mettreAJourPhysique() {
+            // Si l'utilisateur ne touche plus le cube, la physique prend le relais
+            if (!estEnTrainDeGlisser) {
+                // Application de la friction pour ralentir les vitesses à chaque seconde
+                vitesseX *= friction;
+                vitesseY *= friction;
+
+                // Si le mouvement devient minuscule, on l'arrête pour économiser l'écran
+                if (Math.abs(vitesseX) < 0.01) vitesseX = 0;
+                if (Math.abs(vitesseY) < 0.01) vitesseY = 0;
+
+                // Le cube continue sa rotation selon sa vitesse restante
+                rotationY += vitesseY;
+                rotationX -= vitesseX;
+
+                cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            }
+            
+            // Relance la fonction en continu de manière ultra-fluide (60 fois par seconde)
+            requestAnimationFrame(mettreAJourPhysique);
+        }
+        
+        // Lancement immédiat de la boucle physique
+        mettreAJourPhysique();
+
         // --- GESTION DU CLIC SUR UNE FACE ---
         faces.forEach(face => {
             face.addEventListener('click', (e) => {
-                // Si on était en train de faire tourner le cube, on ignore le clic
-                if (estEnTrainDeGlisser) return;
+                // Si le cube bouge encore beaucoup, on refuse le clic pour ne pas perturber la rotation
+                if (Math.abs(vitesseX) > 0.5 || Math.abs(vitesseY) > 0.5) return;
                 
-                // Désactiver la face précédente
                 faces.forEach(f => f.classList.remove('active'));
-                
-                // Activer la face cliquée
                 face.classList.add('active');
             });
         });
