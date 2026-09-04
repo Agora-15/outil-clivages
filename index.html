@@ -106,3 +106,70 @@
         <div class="widget-title" id="active-face-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
+    <script>
+        const scene = document.getElementById('scene'), structure = document.getElementById('structure'), faces = document.querySelectorAll('.face'), widget = document.getElementById('control-widget'), widgetTitle = document.getElementById('active-face-name');
+        let drag = false, cibleX = -20, cibleY = 20, rotationX = -20, rotationY = 20, vitesseX = 0, vitesseY = 0, dernierX = 0, dernierY = 0, faceSelectionnee = null;
+
+        scene.addEventListener('mousedown', (e) => {
+            drag = true; vitesseX = 0; vitesseY = 0;
+            dernierX = e.clientX; dernierY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!drag) return;
+            const deltaX = e.clientX - dernierX, deltaY = e.clientY - dernierY;
+            vitesseY = deltaX * 0.35; vitesseX = deltaY * 0.35;
+            cibleY += vitesseY; cibleX -= vitesseX;
+            dernierX = e.clientX; dernierY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => { drag = false; });
+
+        function bouclePhysique() {
+            if (!drag) { vitesseX *= 0.975; vitesseY *= 0.975; cibleY += vitesseY; cibleX -= vitesseX; }
+            rotationX += (cibleX - rotationX) * 0.12; rotationY += (cibleY - rotationY) * 0.12;
+            structure.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            
+            // Algorithme de redressement permanent : on injecte l'inversion de la rotation 3D 
+            // à l'intérieur de chaque div enfant pour que le texte reste droit face à l'écran
+            faces.forEach(f => {
+                const styleOrigine = f.style.transform.split("translateZ")[0];
+                f.firstElementChild ? f.firstElementChild.style.transform = `rotateY(${-rotationY}deg) rotateX(${-rotationX}deg)` : null;
+            });
+            
+            requestAnimationFrame(bouclePhysique);
+        }
+        bouclePhysique();
+
+        function rafraichirCouleurFace(face) {
+            const score = parseInt(face.getAttribute('data-score')), nomOrigine = face.getAttribute('data-name'), faceOpposee = document.getElementById(face.getAttribute('data-opp')), nomOpposeOrigine = faceOpposee.getAttribute('data-name');
+            if (score > 0) {
+                face.style.background = `rgba(0, 122, 255, ${0.2 + (score * 0.07)})`; face.style.color = score > 5 ? '#ffffff' : '#1c1c1e'; face.style.borderColor = '#0056b3'; face.innerText = nomOrigine + " : +" + score; face.classList.remove('locked');
+                faceOpposee.classList.add('locked'); faceOpposee.innerText = nomOpposeOrigine + " : " + (-(20 - score)); faceOpposee.style.background = ''; faceOpposee.style.color = ''; faceOpposee.setAttribute('data-score', '0'); 
+            } else {
+                face.style.background = 'rgba(255, 255, 255, 0.88)'; face.style.color = '#1c1c1e'; face.style.borderColor = '#007aff'; face.innerText = nomOrigine;
+                faceOpposee.classList.remove('locked'); faceOpposee.style.background = 'rgba(255, 255, 255, 0.88)'; faceOpposee.style.color = '#1c1c1e'; faceOpposee.style.borderColor = '#007aff'; faceOpposee.innerText = nomOpposeOrigine;
+            }
+        }
+
+        faces.forEach(face => {
+            face.addEventListener('click', () => {
+                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3 || face.classList.contains('locked')) return;
+                if (faceSelectionnee && faceSelectionnee !== face && !faceSelectionnee.classList.contains('locked')) rafraichirCouleurFace(faceSelectionnee);
+                faceSelectionnee = face;
+                if (parseInt(face.getAttribute('data-score')) === 0) face.style.background = 'rgba(0, 122, 255, 0.4)';
+                widget.classList.add('visible'); widgetTitle.innerText = face.getAttribute('data-name') + " (+" + face.getAttribute('data-score') + ")";
+            });
+        });
+
+        window.addEventListener('wheel', (e) => {
+            if (faceSelectionnee && !faceSelectionnee.classList.contains('locked')) {
+                e.preventDefault(); let score = parseInt(faceSelectionnee.getAttribute('data-score'));
+                score = e.deltaY < 0 ? Math.min(score + 1, 10) : Math.max(score - 1, 0);
+                faceSelectionnee.setAttribute('data-score', score); rafraichirCouleurFace(faceSelectionnee);
+                widgetTitle.innerText = faceSelectionnee.getAttribute('data-name') + " (+" + score + ")";
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
