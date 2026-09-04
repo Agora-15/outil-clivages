@@ -2,167 +2,88 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Agora-15 | 2 Faces Réelles</title>
+    <title>Agora-15</title>
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #ffffff;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: sans-serif; overflow: hidden; user-select: none;
-        }
-        h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
-        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
-        .scene { width: 340px; height: 320px; margin-top: 20px; display: flex; align-items: center; justify-content: center; }
-        svg { width: 100%; height: 100%; }
-        .face { fill: rgba(255,255,255,0.85); stroke: #007aff; stroke-width: 2; cursor: pointer; transition: all 0.2s; }
-        .face:hover { fill: rgba(0,122,255,0.05); }
-        .face.locked { fill: rgba(142,142,147,0.18)!important; stroke: #8e8e93!important; cursor: not-allowed!important; }
-        .face-text { font-size: 9px; font-weight: bold; fill: #1c1c1e; pointer-events: none; text-anchor: middle; dominant-baseline: central; }
-        .face-text.locked { fill: #4a4a4a!important; font-weight: 500; }
-        .face-text.active { fill: #ffffff!important; }
-        #control-widget {
-            position: absolute; bottom: 40px;
-            background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea;
-            padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            text-align: center; min-width: 280px; opacity: 0; transform: translateY(20px);
-            transition: all 0.4s; pointer-events: none;
-        }
-        #control-widget.visible { opacity: 1; transform: translateY(0); }
-        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
-        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
+        body,html{margin:0;padding:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;overflow:hidden;user-select:none;}
+        h1{position:absolute;top:30px;text-transform:uppercase;letter-spacing:2px;font-weight:300;}
+        p{position:absolute;top:80px;color:#8e8e93;font-size:14px;text-align:center;}
+        .scene{width:240px;height:240px;perspective:600px;margin-top:20px;cursor:grab;}
+        .sphere{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(20deg);}
+        .face{position:absolute;width:240px;height:240px;border:1.5px solid #007aff;border-radius:50%;background:rgba(255,255,255,0.85);color:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;text-align:center;box-sizing:border-box;padding:20px;backface-visibility:visible;cursor:pointer;transition:all 0.2s;}
+        .face.locked{background:rgba(142,142,147,0.18)!important;color:#4a4a4a!important;border-color:#8e8e93!important;cursor:not-allowed!important;}
+        .f0{transform:rotateY(0deg) translateZ(120px);}.f1{transform:rotateY(180deg) translateZ(120px);}
+        .f2{transform:rotateY(90deg) translateZ(120px);}.f3{transform:rotateY(-90deg) translateZ(120px);}
+        .f4{transform:rotateX(90deg) translateZ(120px);}.f5{transform:rotateX(-90deg) translateZ(120px);}
+        .f6{transform:rotateY(45deg) translateZ(120px);}.f7{transform:rotateY(-135deg) translateZ(120px);}
+        .f8{transform:rotateY(-45deg) translateZ(120px);}.f9{transform:rotateY(135deg) translateZ(120px);}
+        .f10{transform:rotateX(45deg) translateZ(120px);}.f11{transform:rotateX(-135deg) translateZ(120px);}
+        #control-widget{position:absolute;bottom:40px;background:rgba(255,255,255,0.95);border:1px solid #e5e5ea;padding:15px 45px;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,0.05);text-align:center;min-width:280px;opacity:0;transform:translateY(20px);transition:all 0.4s;pointer-events:none;}
+        #control-widget.visible{opacity:1;transform:translateY(0);}
+        .widget-title{font-size:16px;font-weight:600;color:#1c1c1e;}
+        .scroll-instruction{font-size:12px;color:#007aff;}
     </style>
 </head>
 <body>
     <h1>Agora-15</h1>
-    <p>Étape 7 (2 faces) : Véritables faces en losanges d'or du Dodécaèdre Rhombique.</p>
-    <div class="scene">
-        <svg viewBox="-160 -160 320 320">
-            <g id="poly-group"></g>
-        </svg>
+    <p>Étape 7 : Modèle Sphérique (12 faces). Glissez pour tourner, molette pour noter.</p>
+    <div class="scene" id="scene">
+        <div class="sphere" id="sphere">
+            <div class="face f0" id="face-0" data-opp="face-1" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="face f1" id="face-1" data-opp="face-0" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+            <div class="face f2" id="face-2" data-opp="face-3" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="face f3" id="face-3" data-opp="face-2" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+            <div class="face f4" id="face-4" data-opp="face-5" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="face f5" id="face-5" data-opp="face-4" data-name="POPULISME" data-score="0">POPULISME</div>
+            <div class="face f6" id="face-6" data-opp="face-7" data-name="FÉMINISME" data-score="0">FÉMINISME</div>
+            <div class="face f7" id="face-7" data-opp="face-6" data-name="PATRIARCAT" data-score="0">PATRIARCAT</div>
+            <div class="face f8" id="face-8" data-opp="face-9" data-name="ESSENTIALISME" data-score="0">ESSENTIALISME</div>
+            <div class="face f9" id="face-9" data-opp="face-8" data-name="CONSTRUCTIVISME" data-score="0">CONSTRUCTIVISME</div>
+            <div class="face f10" id="face-10" data-opp="face-11" data-name="ROYALISME" data-score="0">ROYALISME</div>
+            <div class="face f11" id="face-11" data-opp="face-10" data-name="RÉPUBLICANISME" data-score="0">RÉPUBLICANISME</div>
+        </div>
     </div>
     <div id="control-widget">
-        <div class="widget-title" id="act-name">Clivage</div>
+        <div class="widget-title" id="active-face-name">Clivage</div>
         <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
     <script>
-        const canvas = document.getElementById('poly-group');
-        const widget = document.getElementById('control-widget');
-        const wTitle = document.getElementById('act-name');
-        let selIdx = null;
-
-        const clivages = [
-            { name: "GLOBALISME", opp: 1, score: 0, locked: false },
-            { name: "SOUVERAINISME", opp: 0, score: 0, locked: false }
-        ];
-
-        // LES VRAIS SOMMETS DU DODÉCAÈDRE RHOMBIQUE (Espace 3D mathématique)
-        // d = rayon principal, h = point de croisement des losanges d'or
-        const d = 110;
-        const h = d / Math.sqrt(2); // ~77.78
-
-        // Face 1 (GLOBALISME) : Définie par ses 4 sommets spécifiques dans le volume
-        const f1_s1 = { x: 0, y: 0, z: d };
-        const f1_s2 = { x: h, y: h, z: h };
-        const f1_s3 = { x: d, y: 0, z: 0 };
-        const f1_s4 = { x: h, y: -h, z: h };
-
-        // Face 2 (SOUVERAINISME) : Face opposée symétrique par rapport au centre (0,0,0)
-        const f2_s1 = { x: 0, y: 0, z: -d };
-        const f2_s2 = { x: -h, y: -h, z: -h };
-        const f2_s3 = { x: -d, y: 0, z: 0 };
-        const f2_s4 = { x: -h, y: h, z: -h };
-
-        // Projection 3D fixe inclinée (Montre les faces en perspective conique)
-        function projeter(pt) {
-            const angleX = -25 * Math.PI / 180;
-            const angleY = 35 * Math.PI / 180;
-            const y1 = pt.y * Math.cos(angleX) - pt.z * Math.sin(angleX);
-            const z1 = pt.y * Math.sin(angleX) + pt.z * Math.cos(angleX);
-            const x2 = pt.x * Math.cos(angleY) + z1 * Math.sin(angleY);
-            return { x: x2, y: y1, z: z1 };
+        const scene=document.getElementById('scene'),sphere=document.getElementById('sphere'),faces=document.querySelectorAll('.face'),widget=document.getElementById('control-widget'),wTitle=document.getElementById('active-face-name');
+        let drag=false,cX=-20,cY=20,rX=-20,rY=20,vX=0,vY=0,lX=0,lY=0,sel=null;
+        scene.addEventListener('mousedown',(e)=>{drag=true;vX=0;vY=0;lX=e.clientX;lY=e.clientY;});
+        window.addEventListener('mousemove',(e)=>{if(!drag)return;cY+=(e.clientX-lX)*0.35;cX-=(e.clientY-lY)*0.35;lX=e.clientX;lY=e.clientY;});
+        window.addEventListener('mouseup',()=>{drag=false;});
+        function phys(){
+            if(!drag){vX*=0.975;vY*=0.975;cY+=vY;cX-=vX;}
+            rX+=(cX-rX)*0.12;rY+=(cY-rY)*0.12;
+            sphere.style.transform=`rotateX(${rX}deg) rotateY(${rY}deg)`;
+            requestAnimationFrame(phys);
         }
-
-        function dessiner() {
-            canvas.innerHTML = '';
-            
-            // Calcul des points 2D à l'écran pour la face active (GLOBALISME)
-            const p1_1 = projeter(f1_s1); const p1_2 = projeter(f1_s2);
-            const p1_3 = projeter(f1_s3); const p1_4 = projeter(f1_s4);
-
-            // Calcul des points 2D à l'écran pour la face arrière (SOUVERAINISME)
-            const p2_1 = projeter(f2_s1); const p2_2 = projeter(f2_s2);
-            const p2_3 = projeter(f2_s3); const p2_4 = projeter(f2_s4);
-
-            const faces = [
-                { id: 0, pts: [p1_1, p1_2, p1_3, p1_4], zMoy: (p1_1.z + p1_2.z + p1_3.z + p1_4.z) / 4 },
-                { id: 1, pts: [p2_1, p2_2, p2_3, p2_4], zMoy: (p2_1.z + p2_2.z + p2_3.z + p2_4.z) / 4 }
-            ];
-
-            // Tri par profondeur pour dessiner la face de derrière en premier
-            faces.sort((a, b) => a.zMoy - b.zMoy);
-
-            faces.forEach(f => {
-                const data = clivages[f.id];
-                const poly = document.createElementNS("http://w3.org", "polygon");
-                const pStr = f.pts.map(p => `${p.x},${p.y}`).join(' ');
-                
-                poly.setAttribute("points", pStr);
-                poly.setAttribute("class", "face" + (data.locked ? " locked" : ""));
-                
-                if (selIdx === f.id) poly.style.fill = "rgba(0,122,255,0.4)";
-                else if (data.score > 0) poly.style.fill = `rgba(0, 122, 255, ${0.2 + (data.score * 0.07)})`;
-
-                // Calcul du vrai centre de gravité de la face inclinée pour placer le texte
-                const cx = (f.pts[0].x + f.pts[1].x + f.pts[2].x + f.pts[3].x) / 4;
-                const cy = (f.pts[0].y + f.pts[1].y + f.pts[2].y + f.pts[3].y) / 4;
-
-                const txt = document.createElementNS("http://w3.org", "text");
-                txt.setAttribute("x", cx); txt.setAttribute("y", cy);
-                txt.setAttribute("class", "face-text" + (data.locked ? " locked" : "") + (data.score > 0 || selIdx === f.id ? " active" : ""));
-                
-                let label = data.name;
-                if (data.locked) label += " : " + data.score;
-                else if (data.score > 0) label += " : +" + data.score;
-                txt.textContent = label;
-
-                poly.addEventListener('click', () => {
-                    if (data.locked) return;
-                    selIdx = f.id;
-                    widget.classList.add('visible');
-                    wTitle.textContent = data.name + " (+" + data.score + ")";
-                    dessiner();
-                });
-
-                canvas.appendChild(poly);
-                canvas.appendChild(txt);
-            });
-        }
-        
-        dessiner();
-
-        window.addEventListener('wheel', (e) => {
-            if (selIdx !== null && !clivages[selIdx].locked) {
-                e.preventDefault();
-                let s = clivages[selIdx].score;
-                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
-                
-                clivages[selIdx].score = s;
-                const oppIdx = clivages[selIdx].opp;
-                
-                if (s > 0) {
-                    clivages[oppIdx].score = -(20 - s);
-                    clivages[oppIdx].locked = true;
-                } else {
-                    clivages[oppIdx].score = 0;
-                    clivages[oppIdx].locked = false;
-                }
-                
-                wTitle.textContent = clivages[selIdx].name + " (+" + s + ")";
-                dessiner();
+        phys();
+        function color(f){
+            const s=parseInt(f.getAttribute('data-score')),n=f.getAttribute('data-name'),opp=document.getElementById(f.getAttribute('data-opp')),oName=opp.getAttribute('data-name');
+            if(s>0){
+                f.style.background=`rgba(0,122,255,${0.2+(s*0.07)})`;f.style.color=s>5?'#fff':'#1c1c1e';f.style.borderColor='#0056b3';f.innerText=n+" : +"+s;f.classList.remove('locked');
+                opp.classList.add('locked');opp.innerText=oName+" : "+(-(20-s));opp.style.background='';opp.style.color='';opp.setAttribute('data-score','0');
+            }else{
+                f.style.background='rgba(255,255,255,0.85)';f.style.color='#1c1c1e';f.style.borderColor='#007aff';f.innerText=n;
+                opp.classList.remove('locked');opp.style.background='rgba(255,255,255,0.85)';opp.style.color='#1c1c1e';opp.style.borderColor='#007aff';opp.innerText=oName;
             }
-        }, { passive: false });
+        }
+        faces.forEach(f=>{
+            f.addEventListener('click',()=>{
+                if(Math.abs(vX)>0.3||Math.abs(vY)>0.3||f.classList.contains('locked'))return;
+                if(sel&&sel!==f&&!sel.classList.contains('locked'))color(sel);
+                sel=f;if(parseInt(f.getAttribute('data-score'))===0)f.style.background='rgba(0,122,255,0.4)';
+                widget.classList.add('visible');wTitle.innerText=f.getAttribute('data-name')+" (+"+f.getAttribute('data-score')+")";
+            });
+        });
+        window.addEventListener('wheel',(e)=>{
+            if(sel&&!sel.classList.contains('locked')){
+                e.preventDefault();let s=parseInt(sel.getAttribute('data-score'));
+                s=e.deltaY<0?Math.min(s+1,10):Math.max(s-1,0);sel.setAttribute('data-score',s);color(sel);
+                wTitle.innerText=sel.getAttribute('data-name')+" (+"+s+")";
+            }
+        },{passive:false});
     </script>
 </body>
 </html>
-
-    
