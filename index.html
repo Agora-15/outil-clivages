@@ -2,122 +2,196 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agora-15 | Modèle Pro</title>
+    <title>Agora-15 | Modèle Stable</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #ffffff; font-family: sans-serif; user-select: none; }
-        #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-        #info-overlay { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; color: #1c1c1e; z-index: 10; }
-        h1 { font-size: 24px; font-weight: 300; letter-spacing: 2px; margin: 0 0 5px 0; text-transform: uppercase; }
-        p { font-size: 14px; color: #8e8e93; margin: 0; }
-        #control-widget { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); border: 1px solid #e5e5ea; padding: 15px 45px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; min-width: 280px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10; }
-        #control-widget.visible { opacity: 1; }
-        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; }
-        .scroll-instruction { font-size: 12px; color: #007aff; margin-top: 5px; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden;
+            user-select: none;
+        }
+        h1 { position: absolute; top: 30px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
+        p { position: absolute; top: 80px; color: #8e8e93; font-size: 14px; text-align: center; padding: 0 20px; }
+        .scene { width: 220px; height: 220px; perspective: 800px; perspective-origin: 50% 50%; margin-top: 20px; cursor: grab; }
+        .scene:active { cursor: grabbing; }
+        .cube {
+            width: 100%; height: 100%; position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(20deg);
+            transform-origin: 50% 50% 0px;
+        }
+        .face {
+            position: absolute; width: 220px; height: 220px;
+            border: 2px solid #007aff;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1c1c1e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 600; text-align: center;
+            box-sizing: border-box; padding: 10px;
+            backface-visibility: visible; cursor: pointer;
+            transition: all 0.2s ease; transform-origin: 50% 50% 0px;
+        }
+        .face.locked {
+            background: rgba(142, 142, 147, 0.18) !important;
+            color: #4a4a4a !important;
+            border-color: #8e8e93 !important;
+            cursor: not-allowed !important;
+            font-weight: 500;
+        }
+        .front  { transform: rotateY(  0deg) translateZ(110px); }
+        .back   { transform: rotateY(180deg) translateZ(110px); }
+        .right  { transform: rotateY( 90deg) translateZ(110px); }
+        .left   { transform: rotateY(-90deg) translateZ(110px); }
+        .top    { transform: rotateX( 90deg) translateZ(110px); }
+        .bottom { transform: rotateX(-90deg) translateZ(110px); }
+        #control-widget {
+            position: absolute; bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5ea; padding: 15px 45px;
+            border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center; min-width: 280px;
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.4s; pointer-events: none;
+        }
+        #control-widget.visible { opacity: 1; transform: translateY(0); }
+        .widget-title { font-size: 16px; font-weight: 600; color: #1c1c1e; margin-bottom: 4px; }
+        .scroll-instruction { font-size: 12px; color: #007aff; font-weight: 500; }
     </style>
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://jsdelivr.net"></script>
 </head>
 <body>
-    <div id="info-overlay">
-        <h1>Agora-15</h1>
-        <p>Maintenez le clic pour tourner. Cliquez sur une face pour interagir.</p>
+
+    <h1>Agora-15</h1>
+    <p>Cliquez pour sélectionner. Utilisez la molette pour ajuster. Glissez pour tourner.</p>
+
+    <div class="scene" id="scene">
+        <div class="cube" id="cube">
+            <div class="face front" id="f-glob" data-opp="f-souv" data-name="GLOBALISME" data-score="0">GLOBALISME</div>
+            <div class="face back" id="f-souv" data-opp="f-glob" data-name="SOUVERAINISME" data-score="0">SOUVERAINISME</div>
+            <div class="face right" id="f-egal" data-opp="f-meri" data-name="ÉGALITARISME" data-score="0">ÉGALITARISME</div>
+            <div class="face left" id="f-meri" data-opp="f-egal" data-name="MÉRITOCRATIE" data-score="0">MÉRITOCRATIE</div>
+            <div class="face top" id="f-tech" data-opp="f-popu" data-name="TECHNOCRATIE" data-score="0">TECHNOCRATIE</div>
+            <div class="face bottom" id="f-popu" data-opp="f-tech" data-name="POPULISME" data-score="0">POPULISME</div>
+        </div>
     </div>
-    <div id="canvas-container"></div>
+
     <div id="control-widget">
-        <div class="widget-title" id="active-face-name">Clivage</div>
-        <div class="scroll-instruction">Faites tourner la molette pour ajuster de 0 à +10</div>
+        <div class="widget-title" id="act-name">Clivage</div>
+        <div class="scroll-instruction">Faites tourner la molette pour ajuster</div>
     </div>
+
     <script>
-        const container = document.getElementById('canvas-container'), widget = document.getElementById('control-widget'), wTitle = document.getElementById('active-face-name');
-        const scene = new THREE.Scene(); scene.background = new THREE.Color(0xffffff);
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100); camera.position.set(0, 0, 6);
-        const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio || 1); container.appendChild(renderer.domElement);
-        const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.rotateSpeed = 0.8;
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.4); dirLight.position.set(5, 10, 7); scene.add(dirLight);
+        const scene = document.getElementById('scene');
+        const cube = document.getElementById('cube');
+        const faces = document.querySelectorAll('.face');
+        const widget = document.getElementById('control-widget');
+        const wTitle = document.getElementById('act-name');
 
-        const clivages = [
-            { name: "GLOBALISME", oppId: 1, score: 0 }, { name: "SOUVERAINISME", oppId: 0, score: 0 },
-            { name: "ÉGALITARISME", oppId: 3, score: 0 }, { name: "MÉRITOCRATIE", oppId: 2, score: 0 },
-            { name: "TECHNOCRATIE", oppId: 5, score: 0 }, { name: "POPULISME", oppId: 4, score: 0 }
-        ];
+        let drag = false;
+        let cibleX = -20, cibleY = 20;
+        let rotationX = -20, rotationY = 20;
+        let vitesseX = 0, vitesseY = 0;
+        let dernierX = 0, dernierY = 0;
+        const friction = 0.975;
+        const sensibilite = 0.35;
+        let sel = null;
 
-        const cubeGroup = new THREE.Group(); scene.add(cubeGroup);
-        const facesMesh = [], geometry = new THREE.PlaneGeometry(2, 2);
-        
-        // Coordonnées géométriques réparées et complétées à 100%
-        const configs = [
-            { pos: [0, 0, 1], rot: [0, 0, 0] },
-            { pos: [0, 0, -1], rot: [0, Math.PI, 0] },
-            { pos: [1, 0, 0], rot: [0, Math.PI / 2, 0] },
-            { pos: [-1, 0, 0], rot: [0, -Math.PI / 2, 0] },
-            { pos: [0, 1, 0], rot: [-Math.PI / 2, 0, 0] },
-            { pos: [0, -1, 0], rot: [Math.PI / 2, 0, 0] }
-        ];
-
-        for (let i = 0; i < 6; i++) {
-            const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256; const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 256, 256); ctx.strokeStyle = '#007aff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, 256, 256);
-            ctx.fillStyle = '#1c1c1e'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(clivages[i].name, 128, 128);
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.MeshPhongMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 0.95 });
-            const mesh = new THREE.Mesh(geometry, material); mesh.position.set(configs[i].pos[0], configs[i].pos[1], configs[i].pos[2]); mesh.rotation.set(configs[i].rot[0], configs[i].rot[1], configs[i].rot[2]);
-            mesh.userData = { id: i, canvas: canvas, ctx: ctx, locked: false };
-            cubeGroup.add(mesh); facesMesh.push(mesh);
+        function obtenirDirectionAxeY() {
+            const radX = rotationX * Math.PI / 180;
+            const radY = rotationY * Math.PI / 180;
+            return (Math.cos(radX) * Math.cos(radY)) >= 0 ? 1 : -1;
         }
 
-        function rafraichirTextureFace(id) {
-            const m = facesMesh[id], ctx = m.userData.ctx, data = clivages[id];
-            ctx.clearRect(0, 0, 256, 256);
-            if (m.userData.locked) {
-                ctx.fillStyle = '#e5e5ea'; ctx.fillRect(0, 0, 256, 256); ctx.strokeStyle = '#8e8e93'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, 256, 256);
-                ctx.fillStyle = '#333333'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(data.name, 128, 100); ctx.fillText(data.score, 128, 150); m.material.opacity = 0.5;
-            } else if (data.score > 0) {
-                ctx.fillStyle = '#007aff'; ctx.fillRect(0, 0, 256, 256); ctx.strokeStyle = '#0056b3'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, 256, 256);
-                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(data.name, 128, 100); ctx.fillText("+" + data.score, 128, 150); m.material.opacity = 0.4 + (data.score * 0.06);
+        function CommencerGlisser(e) {
+            drag = true; vitesseX = 0; vitesseY = 0;
+            dernierX = e.clientX || (e.touches && e.touches[0].clientX);
+            dernierY = e.clientY || (e.touches && e.touches[0].clientY);
+        }
+
+        function Glisser(e) {
+            if (!drag) return;
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            const dX = x - dernierX;
+            const dY = y - dernierY;
+            const dirY = obtenirDirectionAxeY();
+            vitesseY = dX * sensibilite * dirY;
+            vitesseX = dY * sensibilite;
+            cibleY += vitesseY;
+            cibleX -= vitesseX;
+            dernierX = x; dernierY = y;
+        }
+
+        function ArreterGlisser() { drag = false; }
+
+        scene.addEventListener('mousedown', CommencerGlisser);
+        window.addEventListener('mousemove', Glisser);
+        window.addEventListener('mouseup', ArreterGlisser);
+        scene.addEventListener('touchstart', CommencerGlisser, { passive: true });
+        window.addEventListener('touchmove', Glisser, { passive: true });
+        window.addEventListener('touchend', ArreterGlisser);
+
+        function bouclePhysique() {
+            if (!drag) {
+                vitesseX *= friction; vitesseY *= friction;
+                cibleY += vitesseY; cibleX -= vitesseX;
+            }
+            rotationX += (cibleX - rotationX) * 0.12;
+            rotationY += (cibleY - rotationY) * 0.12;
+            cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            requestAnimationFrame(bouclePhysique);
+        }
+        bouclePhysique();
+
+        function color(f) {
+            const s = parseInt(f.getAttribute('data-score'));
+            const n = f.getAttribute('data-name');
+            const opp = document.getElementById(f.getAttribute('data-opp'));
+            const oName = opp.getAttribute('data-name');
+            if (s > 0) {
+                f.style.background = `rgba(0,122,255,${0.2+(s*0.07)})`;
+                f.style.color = s > 5 ? '#fff' : '#1c1c1e';
+                f.style.borderColor = '#0056b3';
+                f.innerText = n + " : +" + s;
+                f.classList.remove('locked');
+                const scoreInverse = -(20 - s);
+                opp.classList.add('locked');
+                opp.innerText = oName + " : " + scoreInverse;
+                opp.style.background = ''; opp.style.color = '';
             } else {
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 256, 256); ctx.strokeStyle = '#007aff'; ctx.lineWidth = 8; ctx.strokeRect(0, 0, 256, 256);
-                ctx.fillStyle = '#1c1c1e'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(data.name, 128, 128); m.material.opacity = 0.95;
+                f.style.background = 'rgba(255,255,255,0.9)';
+                f.style.color = '#1c1c1e';
+                f.style.borderColor = '#007aff';
+                f.innerText = n;
+                opp.classList.remove('locked');
+                opp.style.background = 'rgba(255,255,255,0.9)';
+                opp.style.color = '#1c1c1e';
+                opp.style.borderColor = '#007aff';
+                opp.innerText = oName;
             }
-            m.material.map.needsUpdate = true;
         }
 
-        const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2(); let selId = null;
-        window.addEventListener('click', (e) => {
-            if (e.clientY > window.innerHeight - 100) return;
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera); const intersects = raycaster.intersectObjects(cubeGroup.children);
-            if (intersects.length > 0) {
-                const hitMesh = intersects[0].object; const id = hitMesh.userData.id;
-                if (hitMesh.userData.locked) return;
-                selId = id; widget.classList.add('visible'); wTitle.innerText = clivages[id].name + " (+" + clivages[id].score + ")";
-            }
+        faces.forEach(f => {
+            f.addEventListener('click', () => {
+                if (Math.abs(vitesseX) > 0.3 || Math.abs(vitesseY) > 0.3 || f.classList.contains('locked')) return;
+                if (sel && sel !== f && !sel.classList.contains('locked')) color(sel);
+                sel = f;
+                if (parseInt(f.getAttribute('data-score')) === 0) f.style.background = 'rgba(0, 122, 255, 0.4)';
+                widget.classList.add('visible');
+                wTitle.innerText = f.getAttribute('data-name') + " (+" + f.getAttribute('data-score') + ")";
+            });
         });
 
         window.addEventListener('wheel', (e) => {
-            if (selId !== null) {
-                e.preventDefault(); controls.enableZoom = false;
-                let s = clivages[selId].score; s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0); clivages[selId].score = s;
-                const oppId = clivages[selId].oppId;
-                if (s > 0) { clivages[oppId].score = -(20 - s); facesMesh[oppId].userData.locked = true; } 
-                else { clivages[oppId].score = 0; facesMesh[oppId].userData.locked = false; }
-                rafraichirTextureFace(selId); rafraichirTextureFace(oppId);
-                wTitle.innerText = clivages[selId].name + " (+" + s + ")";
-                setTimeout(() => { controls.enableZoom = true; }, 150);
+            if (sel && !sel.classList.contains('locked')) {
+                e.preventDefault();
+                let s = parseInt(sel.getAttribute('data-score'));
+                s = e.deltaY < 0 ? Math.min(s + 1, 10) : Math.max(s - 1, 0);
+                sel.setAttribute('data-score', s);
+                color(sel);
+                wTitle.innerText = sel.getAttribute('data-name') + " (+" + s + ")";
             }
         }, { passive: false });
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if (selId === null) { cubeGroup.rotation.y += 0.001; cubeGroup.rotation.x += 0.0005; }
-            controls.update(); renderer.render(scene, camera);
-        }
-        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-        animate();
     </script>
 </body>
 </html>
